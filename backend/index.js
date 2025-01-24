@@ -1,15 +1,16 @@
 import 'dotenv/config';
-import e from 'express';
+import express from 'express';
 import sqlQuery from './utils/db.js';
+import authRoutes from './routes/authRoutes.js';
 
-const app = e();
-const port = 3000;
+const app = express();
+const port = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-});
+app.use(express.json());
+
+app.get('/', (req, res) => {res.send('Hello World');});
+app.use('/api/auth', authRoutes);
 
 app.listen(port, () => {
     console.log(`Server started at http://localhost:${port}`);
 });
-

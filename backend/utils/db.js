@@ -8,13 +8,16 @@ const con = createConnection({
 });
 
 con.connect((err) => {
-    if (err) throw err;
+    if (err) {
+        console.error('Error connecting to the database:', err);
+        process.exit(1);
+    }
     console.log('Connected to MySQL Server!');
 });
 
-const sqlQuery = (sql) => {
+const sqlQuery = (sql, params = []) => {
     return new Promise((resolve, reject) => {
-        con.query(sql, (err, result) => {
+        con.query(sql, params, (err, result) => {
             if (err) return reject(err);
             resolve(result);
         });
@@ -22,4 +25,3 @@ const sqlQuery = (sql) => {
 };
 
 export default sqlQuery;
-
