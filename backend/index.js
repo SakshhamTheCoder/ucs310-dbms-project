@@ -3,7 +3,6 @@ import express from 'express';
 import sqlQuery from './utils/db.js';
 import initDb from './utils/initDb.js';
 import authRoutes from './routes/authRoutes.js';
-import quizRoutes from './routes/quizRoutes.js';
 import cors from 'cors';
 
 const app = express();
@@ -20,7 +19,6 @@ initDb()
             res.send('Hello World');
         });
         app.use('/api/auth', authRoutes);
-        app.use('/api/quiz', quizRoutes);
 
         // Start server
         app.listen(port, () => {

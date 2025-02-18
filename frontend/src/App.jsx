@@ -8,6 +8,7 @@ import {
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import { useAuth } from "./utils/AuthContext";
+import Register from "./pages/Register";
 
 const App = () => {
   const { isLoggedIn, loading } = useAuth();
@@ -21,7 +22,7 @@ const App = () => {
           <Route
             path="/"
             element={
-              isLoggedIn ? <Home /> : <Login />
+              isLoggedIn ? <Home /> : <Register />
             }
           />
         </Routes>

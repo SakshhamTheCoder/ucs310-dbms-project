@@ -18,8 +18,8 @@ const Login = () => {
 
     return (
         <div className='flex flex-col justify-center items-center flex-1'>
-            <h1 className='text-6xl font-bold text-center'>Welcome to Quiz Portal</h1>
-            <p className='text-2xl mt-4 text-center'>Please login to start the quiz</p>
+            <h1 className='text-6xl font-bold text-center'>Welcome to Air Yatra</h1>
+            <p className='text-2xl mt-4 text-center'>Please login to start booking</p>
 
             <form className='mt-8 flex flex-col w-1/3' onSubmit={handleSubmit}>
                 <input

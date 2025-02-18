@@ -4,6 +4,7 @@ import api from './apiClient';
 const AuthContext = React.createContext({
     isLoggedIn: false,
     login: () => { },
+    register: () => { },
     logout: () => { },
     user: null,
     loading: true,
@@ -17,11 +18,39 @@ export const AuthContextProvider = (props) => {
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
-            api.setAuthHeader(token);
-            setUserIsLoggedIn(true);
+            api.post('/auth/me', { token })
+                .then((response) => {
+                    setUser(response.user);
+                    setUserIsLoggedIn(true);
+                    console.log('Token verified:', response);
+                })
+                .catch((error) => {
+                    console.error('Token verification failed:', error);
+                    localStorage.removeItem('token');
+                });
         }
         setLoading(false);
     }, []);
+
+    const registerHandler = async ({ username, email, password, phone, passport }) => {
+        try {
+            const response = await api.post('/auth/register', {
+                username, email, password, phone, passport
+            });
+
+            const { token, user } = response;
+
+            localStorage.setItem('token', token);
+            api.setAuthHeader(token);
+
+            setUserIsLoggedIn(true);
+            setUser(user);
+        } catch (error) {
+            console.error('Registration failed:', error);
+            throw error;
+        }
+    };
+
 
     const loginHandler = async ({ email, password }) => {
         try {
@@ -49,6 +78,7 @@ export const AuthContextProvider = (props) => {
     const contextValue = {
         isLoggedIn: userIsLoggedIn,
         login: loginHandler,
+        register: registerHandler,
         logout: logoutHandler,
         user: user,
         loading: loading,
