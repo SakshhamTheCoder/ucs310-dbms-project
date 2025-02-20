@@ -4,6 +4,7 @@ import sqlQuery from './utils/db.js';
 import initDb from './utils/initDb.js';
 import authRoutes from './routes/authRoutes.js';
 import cors from 'cors';
+import flightRoutes from './routes/flightRoutes.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -19,6 +20,7 @@ initDb()
             res.send('Hello World');
         });
         app.use('/api/auth', authRoutes);
+        app.use('/api', flightRoutes);
 
         // Start server
         app.listen(port, () => {
