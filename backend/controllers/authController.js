@@ -18,12 +18,19 @@ export const login = async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1y' });
+        const token = jwt.sign({ id: user.user_id }, process.env.JWT_SECRET, { expiresIn: '1y' });
 
-        res.json({ token, user: { id: user.id, username: user.username, email: user.email } });
+        res.json({
+            token,
+            user: {
+                id: user.user_id,
+                username: user.username,
+                email: user.email,
+            },
+        });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Login Error:', err);
+        res.status(500).json({ message: 'Server error during login' });
     }
 };
 
@@ -59,16 +66,24 @@ export const register = async (req, res) => {
             },
         });
     } catch (err) {
-        console.error(err);
+        console.error('Registration Error:', err);
         res.status(500).json({ message: 'Server error during registration' });
     }
 };
 
 export const me = async (req, res) => {
-    const { token } = req.body;
+    const token = req.headers.authorization?.split(' ')[1];
+    console.log('Token received:', token); // Debug log
+
+    if (!token) {
+        return res.status(401).json({ message: 'No token provided' });
+    }
+
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const users = await sqlQuery('SELECT user_id, username, email FROM users WHERE user_id = ?', [decoded.id]);
+        console.log('Decoded token:', decoded); // Debug log
+
+        const users = await sqlQuery('SELECT user_id, username, email, phone_number FROM users WHERE user_id = ?', [decoded.id]);
         if (users.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -77,11 +92,11 @@ export const me = async (req, res) => {
                 id: users[0].user_id,
                 username: users[0].username,
                 email: users[0].email,
+                phone: users[0].phone_number,
             },
         });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Auth Error:', err);
+        res.status(401).json({ message: 'Invalid or expired token' });
     }
 };
-
