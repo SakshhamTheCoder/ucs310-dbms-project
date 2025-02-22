@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -7,28 +7,31 @@ import {
 } from "react-router-dom";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
-import { useAuth } from "./utils/AuthContext";
 import Register from "./pages/Register";
+import Flights from "./pages/Flights";
+import MyBookings from "./pages/MyBookings";
+import { useAuth } from "./utils/AuthContext";
+import Navbar from "./components/Navbar";
 
 const App = () => {
-  const { isLoggedIn, loading } = useAuth();
-  if (loading) {
-    return <></>;
-  }
-  return (
-    <div className="flex flex-col min-h-screen md:h-screen p-4 md:p-8">
-      <Router>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              isLoggedIn ? <Home /> : <Register />
-            }
-          />
-        </Routes>
-      </Router>
-    </div>
-  );
+    const { isLoggedIn, loading } = useAuth();
+
+    if (loading) return <></>;
+
+    return (
+        <div className="flex flex-col min-h-screen md:h-screen p-4 md:p-8">
+            <Router>
+                <Navbar />
+                <Routes>
+                    <Route path="/" element={isLoggedIn ? <Home /> : <Register />} />
+                    <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login />} />
+                    <Route path="/register" element={isLoggedIn ? <Navigate to="/" /> : <Register />} />
+                    <Route path="/flights" element={isLoggedIn ? <Flights /> : <Navigate to="/login" />} />
+                    <Route path="/my-bookings" element={isLoggedIn ? <MyBookings /> : <Navigate to="/login" />} />
+                </Routes>
+            </Router>
+        </div>
+    );
 };
 
 export default App;

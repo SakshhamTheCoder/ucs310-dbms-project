@@ -4,6 +4,8 @@ import bcrypt from 'bcrypt';
 
 const initDb = async () => {
     try {
+        console.log('Initializing database...');
+
         // Create users table
         const createUserTable = `
             CREATE TABLE IF NOT EXISTS users (
@@ -16,6 +18,7 @@ const initDb = async () => {
             )
         `;
         await sqlQuery(createUserTable);
+        console.log('Users table created successfully!');
 
         const hashedPassword = await bcrypt.hash('admin123', 10);
 
@@ -37,6 +40,7 @@ const initDb = async () => {
             )
         `;
         await sqlQuery(createAirportsTable);
+        console.log('Airports table created successfully!');
 
         // Create airlines table
         const createAirlinesTable = `
@@ -46,6 +50,7 @@ const initDb = async () => {
             )
         `;
         await sqlQuery(createAirlinesTable);
+        console.log('Airlines table created successfully!');
 
         // Create flights table
         const createFlightsTable = `
@@ -63,6 +68,7 @@ const initDb = async () => {
             )
         `;
         await sqlQuery(createFlightsTable);
+        console.log('Flights table created successfully!');
 
         // Create bookings table
         const createBookingsTable = `
@@ -76,6 +82,7 @@ const initDb = async () => {
             )
         `;
         await sqlQuery(createBookingsTable);
+        console.log('Bookings table created successfully!');
 
         console.log('Database initialized successfully!');
     } catch (err) {

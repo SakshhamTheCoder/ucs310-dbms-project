@@ -9,8 +9,14 @@ import flightRoutes from './routes/flightRoutes.js';
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Configure CORS
+app.use(
+    cors({
+        origin: 'http://localhost:5173', // Allow requests from this origin
+    })
+);
+
 app.use(express.json());
-app.use(cors());
 
 // Initialize database tables
 initDb()
@@ -19,8 +25,8 @@ initDb()
         app.get('/', (req, res) => {
             res.send('Hello World');
         });
-        app.use('/api/auth', authRoutes);
-        app.use('/api', flightRoutes);
+        app.use('/api/auth', authRoutes); // Mount auth routes
+        app.use('/api', flightRoutes); // Mount flight routes
 
         // Start server
         app.listen(port, () => {
@@ -31,4 +37,3 @@ initDb()
         console.error('Failed to initialize database:', err);
         process.exit(1);
     });
-

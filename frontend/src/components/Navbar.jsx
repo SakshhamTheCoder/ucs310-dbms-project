@@ -1,19 +1,30 @@
-import React from 'react';
-import { useAuth } from '../utils/AuthContext';
+import React from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../utils/AuthContext";
 
 const Navbar = () => {
-  const { user } = useAuth();
-  return (
-    <header className='top-0 px-8 bg-accent text-tertiary h-1/12 rounded-2xl flex items-center justify-between'>
-      <div className='text-3xl'>
-        Air Yatra <span className='text-sm'>(Logged in as {user.username})</span>
-      </div>
-      <button className='p-2 bg-red-400 hover:bg-red-600 rounded-2xl cursor-pointer'>
-        LogOut
-      </button>
-    </header>
-  );
+    const { isLoggedIn, user, logout } = useAuth();
+    console.log('Navbar user state:', user); // Debug log
+
+    return (
+        <nav className="p-4 bg-gray-800 text-white flex justify-between">
+            <h1 className="text-xl font-bold cursor-pointer">
+                <Link to="/">Air Yatra</Link>
+            </h1>
+            {isLoggedIn ? (
+                <div className="space-x-4">
+                    <span className="text-white">Welcome, {user?.username} | </span>
+                    <Link to="/flights" className="hover:underline">Flights</Link>
+                    <Link to="/my-bookings" className="hover:underline">My Bookings</Link>
+                    <button onClick={logout} className="ml-4 px-3 py-1 bg-red-500 rounded">
+                        Logout
+                    </button>
+                </div>
+            ) : (
+                <Link to="/login" className="hover:underline">Login</Link>
+            )}
+        </nav>
+    );
 };
 
 export default Navbar;
-
