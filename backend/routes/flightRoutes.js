@@ -22,6 +22,7 @@ router.post('/flights/add', authenticateToken, addFlight);
 router.get('/airports', authenticateToken, listAirports);
 router.post('/airports/add', authenticateToken, addAirport);
 router.get('/airlines', authenticateToken, listAirlines);
-router.post('/airlines/add', authenticateToken, addAirline); // Add this line
+router.post('/airlines/add', authenticateToken, addAirline);
 
 export default router;
+

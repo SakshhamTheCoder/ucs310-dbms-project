@@ -75,7 +75,7 @@ const Home = () => {
                 </div>
             ) : (
                 <p>
-                    No bookings found. 
+                    No bookings found.
                     {/* Book a flight from the <a href="/flights" className="text-blue-500">Flights page</a>. */}
                 </p>
             )}

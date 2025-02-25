@@ -14,7 +14,6 @@ export const authenticateToken = (req, res, next) => {
             return res.status(403).json({ message: 'Invalid or expired token' });
         }
 
-        // Attach decoded user to the request
         req.user = decoded;
         next();
     });
@@ -26,3 +25,4 @@ export const verifyAdmin = (req, res, next) => {
     }
     next();
 };
+

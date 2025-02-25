@@ -6,7 +6,6 @@ const initDb = async () => {
     try {
         console.log('Initializing database...');
 
-        // Create users table
         const createUserTable = `
             CREATE TABLE IF NOT EXISTS users (
                 user_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -31,7 +30,6 @@ const initDb = async () => {
         await sqlQuery(adminUser, ['Admin', 'admin@example.com', hashedPassword, '1234567890', 'ABC123']);
         console.log('Admin user added successfully!');
 
-        // Create airports table
         const createAirportsTable = `
             CREATE TABLE IF NOT EXISTS airports (
                 airport_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -42,7 +40,6 @@ const initDb = async () => {
         await sqlQuery(createAirportsTable);
         console.log('Airports table created successfully!');
 
-        // Create airlines table
         const createAirlinesTable = `
             CREATE TABLE IF NOT EXISTS airlines (
                 airline_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -52,7 +49,6 @@ const initDb = async () => {
         await sqlQuery(createAirlinesTable);
         console.log('Airlines table created successfully!');
 
-        // Create flights table
         const createFlightsTable = `
             CREATE TABLE IF NOT EXISTS flights (
                 flight_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -70,7 +66,6 @@ const initDb = async () => {
         await sqlQuery(createFlightsTable);
         console.log('Flights table created successfully!');
 
-        // Create bookings table
         const createBookingsTable = `
             CREATE TABLE IF NOT EXISTS bookings (
                 booking_id INT AUTO_INCREMENT PRIMARY KEY,

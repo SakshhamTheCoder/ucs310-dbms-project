@@ -4,7 +4,6 @@ import { useAuth } from "../utils/AuthContext";
 
 const Navbar = () => {
     const { isLoggedIn, user, logout } = useAuth();
-    console.log('Navbar user state:', user); // Debug log
 
     return (
         <nav className="p-4 bg-gray-800 text-white flex justify-between">

@@ -73,7 +73,7 @@ export const register = async (req, res) => {
 
 export const me = async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
-    console.log('Token received:', token); // Debug log
+    console.log('Token received:', token);
 
     if (!token) {
         return res.status(401).json({ message: 'No token provided' });
@@ -81,9 +81,11 @@ export const me = async (req, res) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log('Decoded token:', decoded); // Debug log
+        console.log('Decoded token:', decoded);
 
-        const users = await sqlQuery('SELECT user_id, username, email, phone_number FROM users WHERE user_id = ?', [decoded.id]);
+        const users = await sqlQuery('SELECT user_id, username, email, phone_number FROM users WHERE user_id = ?', [
+            decoded.id,
+        ]);
         if (users.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
