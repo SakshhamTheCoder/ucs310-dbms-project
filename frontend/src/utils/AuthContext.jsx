@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import api from './apiClient';
 
 const AuthContext = React.createContext({
-    isLoggedIn: false,
+    isLoggedIn: null,
     login: () => { },
     register: () => { },
     logout: () => { },
@@ -11,14 +11,14 @@ const AuthContext = React.createContext({
 });
 
 export const AuthContextProvider = (props) => {
-    const [userIsLoggedIn, setUserIsLoggedIn] = useState(false);
+    const [userIsLoggedIn, setUserIsLoggedIn] = useState(null);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Check if the user is logged in on page load
+
     useEffect(() => {
         const token = localStorage.getItem('token');
-        console.log('Token from localStorage:', token); // Debug log
+        console.log('Token from localStorage:', token);
 
         if (token) {
             api.get('/auth/me', {
@@ -27,16 +27,20 @@ export const AuthContextProvider = (props) => {
                 },
             })
                 .then((response) => {
-                    console.log('User data fetched:', response); // Debug log
+                    console.log('User data fetched:', response);
                     setUser(response.user);
                     setUserIsLoggedIn(true);
                 })
                 .catch((error) => {
                     console.error('Token verification failed:', error);
                     localStorage.removeItem('token');
+                })
+                .finally(() => {
+                    setLoading(false);
                 });
+        } else {
+            setLoading(false);
         }
-        setLoading(false);
     }, []);
 
     const registerHandler = async ({ username, email, password, phone, passport }) => {
@@ -48,12 +52,12 @@ export const AuthContextProvider = (props) => {
             const { token, user } = response;
 
             localStorage.setItem('token', token);
-            console.log('Token saved to localStorage:', token); // Debug log
+            console.log('Token saved to localStorage:', token);
             api.setAuthHeader(token);
 
             setUserIsLoggedIn(true);
             setUser(user);
-            console.log('User state set:', user); // Debug log
+            console.log('User state set:', user);
         } catch (error) {
             console.error('Registration failed:', error);
             throw error;
@@ -63,15 +67,15 @@ export const AuthContextProvider = (props) => {
     const loginHandler = async ({ email, password }) => {
         try {
             const response = await api.post('/auth/login', { email, password });
-            const { token, user } = response; // Ensure the backend returns the user object
+            const { token, user } = response;
 
             localStorage.setItem('token', token);
-            console.log('Token saved to localStorage:', token); // Debug log
+            console.log('Token saved to localStorage:', token);
             api.setAuthHeader(token);
 
             setUserIsLoggedIn(true);
-            setUser(user); // Update the user state
-            console.log('User state set:', user); // Debug log
+            setUser(user);
+            console.log('User state set:', user);
         } catch (error) {
             console.error('Login failed:', error);
             throw error;
@@ -94,7 +98,7 @@ export const AuthContextProvider = (props) => {
         loading: loading,
     };
 
-    console.log('AuthContext state:', contextValue); // Debug log
+    console.log('AuthContext state:', contextValue);
 
     return <AuthContext.Provider value={contextValue}>{props.children}</AuthContext.Provider>;
 };
