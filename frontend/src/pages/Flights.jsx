@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../utils/AuthContext';
 import { useNavigate } from 'react-router-dom';
-
+import toast from 'react-hot-toast';
 const Flights = () => {
     const [flights, setFlights] = useState([]);
     const [bookings, setBookings] = useState([]); // To store user's bookings
@@ -46,8 +46,13 @@ const Flights = () => {
     // Filter out flights that the user has already booked
     const availableFlights = flights.filter((flight) => {
         const isBooked = bookings.some((booking) => booking.flight_id === flight.flight_id);
-        return !isBooked; // Only include flights that are not booked
+        const departureTime = new Date(flight.departure_time); // Convert to Date object
+        const currentTime = new Date(); // Get current time
+        const fourHoursLater = new Date(currentTime.getTime() + 4 * 60 * 60 * 1000); // 4 hours from now
+    
+        return !isBooked && departureTime > fourHoursLater; // Only include future flights
     });
+    
 
     const handleBookNow = async (flightId) => {
         try {
@@ -68,7 +73,7 @@ const Flights = () => {
             // Remove the booked flight from the list
             setFlights((prevFlights) => prevFlights.filter((flight) => flight.flight_id !== flightId));
 
-            alert('Booking successful!');
+            toast.success('Booking successfull !');
         } catch (error) {
             console.error('Booking error:', error);
             alert('Booking failed. Try again.');
@@ -114,4 +119,4 @@ const Flights = () => {
     );
 };
 
-export default Flights;
+export default Flights

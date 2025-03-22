@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from '../components/Modal';
 import api from '../utils/apiClient';
-
+import toast from 'react-hot-toast';
 const Admin = () => {
     const [showAddFlightModal, setShowAddFlightModal] = useState(false);
     const [showAddAirportModal, setShowAddAirportModal] = useState(false);
@@ -49,7 +49,7 @@ const Admin = () => {
             });
 
             if (response.flight_id) {
-                alert('Flight added');
+                toast.success('Flight Added succesfully')
                 handleCloseModal();
             }
         } catch (error) {
@@ -66,7 +66,7 @@ const Admin = () => {
             });
 
             if (response.airport_id) {
-                alert('Airport added');
+                toast.success('Airport added');
                 handleCloseModal();
             }
         } catch (error) {
@@ -82,7 +82,7 @@ const Admin = () => {
             });
 
             if (response.airline_id) {
-                alert('Airline added');
+                toast.success('Airline added');
                 handleCloseModal();
             }
         } catch (error) {
@@ -151,6 +151,7 @@ const Admin = () => {
                     </button>
                 </form>
             </Modal>
+            
             <Modal show={showAddAirportModal} onClose={handleCloseModal}>
                 <h2 className="text-xl font-bold mb-4">Add Airport</h2>
                 <form onSubmit={handleAirportSubmit} className="space-y-4">
@@ -167,6 +168,8 @@ const Admin = () => {
                     </button>
                 </form>
             </Modal>
+            
+
             <Modal show={showAddAirlineModal} onClose={handleCloseModal}>
                 <h2 className="text-xl font-bold mb-4">Add Airline</h2>
                 <form onSubmit={handleAirlineSubmit} className="space-y-4">

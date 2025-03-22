@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../utils/AuthContext";
 import { useNavigate, Link } from "react-router-dom"; // Added Link import
-
+import toast from "react-hot-toast";
 const MyBookings = () => {
     const [bookings, setBookings] = useState([]);
     const { user } = useAuth();
@@ -38,7 +38,7 @@ const MyBookings = () => {
             // Remove the deleted booking from the list
             setBookings(bookings.filter((booking) => booking.booking_id !== bookingId));
 
-            alert('Booking deleted successfully!');
+            toast.success('Booking deleted successfully!');
         } catch (error) {
             console.error('Delete booking error:', error);
             alert('Failed to delete booking. Try again.');
