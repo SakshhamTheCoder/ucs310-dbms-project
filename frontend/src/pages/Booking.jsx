@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from "../utils/AuthContext";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/apiClient";
+import toast from "react-hot-toast";
 
 const Booking = ({ flight }) => {
     const { user } = useAuth();
@@ -20,7 +21,7 @@ const Booking = ({ flight }) => {
                 seats,
             });
     
-            alert("Booking successful!");
+            toast.success("Booking successfull !");
             navigate("/my-bookings");
         } catch (error) {
             alert("Booking failed. Try again.");

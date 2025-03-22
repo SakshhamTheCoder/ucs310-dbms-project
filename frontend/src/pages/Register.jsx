@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../utils/AuthContext';
-
+import toast from 'react-hot-toast';
 const Register = () => {
     const { register, isLoggedIn, user } = useAuth();
     const [username, setUsername] = useState('');
@@ -14,7 +14,7 @@ const Register = () => {
         e.preventDefault();
         try {
             await register({ username, email, password, phone, passport });
-            alert('Register successful!');
+            toast.success('Register successful!');
         } catch (error) {
             alert('Invalid data');
         }
