@@ -3,7 +3,7 @@ import sqlQuery from '../utils/db.js';
 export const listFlights = async (req, res) => {
     try {
         const flights = await sqlQuery(`
-            SELECT flights.flight_id, departure_time, arrival_time, 
+            SELECT flights.flight_id, departure_time, arrival_time, terminal, 
                    dep.airport_name AS departure_airport, arr.airport_name AS arrival_airport, 
                    airlines.airline_name
             FROM flights
@@ -121,19 +121,19 @@ export const addAirline = async (req, res) => {
 };
 
 export const addFlight = async (req, res) => {
-    const { departureStation, arrivalStation, airlineId, departureTime, arrivalTime } = req.body;
+    const { departureStation, arrivalStation, airlineId, departureTime, arrivalTime, terminal } = req.body;
 
-    if (!departureStation || !arrivalStation || !airlineId || !departureTime || !arrivalTime) {
+    if (!departureStation || !arrivalStation || !airlineId || !departureTime || !arrivalTime || !terminal) {
         return res.status(400).json({ message: 'All fields are required' });
     }
 
     try {
         const result = await sqlQuery(
             `
-            INSERT INTO flights (departure_station, arrival_station, airline_id, departure_time, arrival_time)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO flights (departure_station, arrival_station, airline_id, departure_time, arrival_time, terminal)
+            VALUES (?, ?, ?, ?, ?, ?)
         `,
-            [departureStation, arrivalStation, airlineId, departureTime, arrivalTime]
+            [departureStation, arrivalStation, airlineId, departureTime, arrivalTime, terminal]
         );
 
         res.status(201).json({ message: 'Flight added successfully', flight_id: result.insertId });

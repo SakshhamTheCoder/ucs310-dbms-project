@@ -46,10 +46,11 @@ const Admin = () => {
                 airlineId: event.target.airlineId.value,
                 departureTime: event.target.departureTime.value,
                 arrivalTime: event.target.arrivalTime.value,
+                terminal: event.target.terminal.value,
             });
 
             if (response.flight_id) {
-                toast.success('Flight Added succesfully')
+                toast.success('Flight Added succesfully');
                 handleCloseModal();
             }
         } catch (error) {
@@ -139,6 +140,10 @@ const Admin = () => {
                         </select>
                     </div>
                     <div>
+                        <label className="block text-sm font-medium text-gray-700">Terminal</label>
+                        <input placeholder='Enter Terminal Number' type="text" name="terminal" required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
+                    </div>
+                    <div>
                         <label className="block text-sm font-medium text-gray-700">Departure Time</label>
                         <input type="datetime-local" name="departureTime" required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
                     </div>
@@ -151,7 +156,7 @@ const Admin = () => {
                     </button>
                 </form>
             </Modal>
-            
+
             <Modal show={showAddAirportModal} onClose={handleCloseModal}>
                 <h2 className="text-xl font-bold mb-4">Add Airport</h2>
                 <form onSubmit={handleAirportSubmit} className="space-y-4">
@@ -168,7 +173,7 @@ const Admin = () => {
                     </button>
                 </form>
             </Modal>
-            
+
 
             <Modal show={showAddAirlineModal} onClose={handleCloseModal}>
                 <h2 className="text-xl font-bold mb-4">Add Airline</h2>
