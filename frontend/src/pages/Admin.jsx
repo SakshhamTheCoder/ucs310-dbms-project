@@ -94,15 +94,17 @@ const Admin = () => {
     return (
         <div className="container mx-auto p-4">
             <h1 className="text-2xl font-bold mb-4">Admin</h1>
-            <button className="btn bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 mr-2" onClick={handleAddFlight}>
-                Add Flight
-            </button>
-            <button className="btn bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 mr-2" onClick={handleAddAirport}>
-                Add Airport
-            </button>
-            <button className="btn bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700" onClick={handleAddAirline}>
-                Add Airline
-            </button>
+            <div className='flex flex-col justify-center items-center gap-4'>
+                <button className="btn w-72 cursor-pointer bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700" onClick={handleAddFlight}>
+                    Add Flight
+                </button>
+                <button className="btn w-72 cursor-pointer bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700" onClick={handleAddAirport}>
+                    Add Airport
+                </button>
+                <button className="btn w-72 cursor-pointer bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700" onClick={handleAddAirline}>
+                    Add Airline
+                </button>
+            </div>
             <Modal show={showAddFlightModal} onClose={handleCloseModal}>
                 <h2 className="text-xl font-bold mb-4">Add Flight</h2>
                 <form onSubmit={handleFlightSubmit} className="space-y-4">
@@ -162,11 +164,11 @@ const Admin = () => {
                 <form onSubmit={handleAirportSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Airport Name</label>
-                        <input type="text" name="airportName" required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
+                        <input placeholder='Enter Airport Name Code' type="text" name="airportName" required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700">City</label>
-                        <input type="text" name="city" required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
+                        <input placeholder='Enter Airport City' type="text" name="city" required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
                     </div>
                     <button type="submit" className="btn bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700">
                         Submit
@@ -180,7 +182,7 @@ const Admin = () => {
                 <form onSubmit={handleAirlineSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Airline Name</label>
-                        <input type="text" name="airlineName" required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
+                        <input placeholder='Enter Airline Name' type="text" name="airlineName" required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" />
                     </div>
                     <button type="submit" className="btn bg-green-500 text-white py-2 px-4 rounded hover:bg-green-700">
                         Submit
