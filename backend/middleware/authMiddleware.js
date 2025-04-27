@@ -1,28 +1,29 @@
 import jwt from 'jsonwebtoken';
 
 export const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+  const header = req.headers['authorization'];
+  const token = header?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
 
-    if (!token) {
-        return res.status(401).json({ message: 'No token provided' });
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      console.error('JWT verify error:', err);
+      return res
+        .status(403)
+        .json({ message: 'Invalid or expired token' });
     }
-
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-        if (err) {
-            console.error('JWT verification error:', err);
-            return res.status(403).json({ message: 'Invalid or expired token' });
-        }
-
-        req.user = decoded;
-        next();
-    });
+    req.user = decoded; // { id, username }
+    next();
+  });
 };
 
 export const verifyAdmin = (req, res, next) => {
-    if (!req.user || req.user.username !== 'admin') {
-        return res.status(403).json({ message: 'Access denied: Admins only' });
-    }
-    next();
+  if (req.user?.username !== 'Admin') {
+    return res
+      .status(403)
+      .json({ message: 'Access denied: Admins only' });
+  }
+  next();
 };
-

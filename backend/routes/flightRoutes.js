@@ -1,28 +1,35 @@
 import express from 'express';
-import { authenticateToken } from '../middleware/authMiddleware.js';
 import {
-    listFlights,
-    fetchUserBookings,
-    bookFlight,
-    deleteBooking,
-    addFlight,
-    listAirports,
-    addAirport,
-    listAirlines,
-    addAirline,
+  listFlights,
+  fetchUserBookings,
+  bookFlight,
+  deleteBooking,
+  addFlight,
+  listAirports,
+  addAirport,
+  listAirlines,
+  addAirline,
 } from '../controllers/flightController.js';
+import {
+  authenticateToken,
+  verifyAdmin,
+} from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/flights', authenticateToken, listFlights);
-router.get('/bookings', authenticateToken, fetchUserBookings);
+// — Public —
+router.get('/flights', listFlights);
+router.get('/airports', listAirports);
+router.get('/airlines', listAirlines);
+
+// — Admin Only —
+router.post('/flights/add', authenticateToken, verifyAdmin, addFlight);
+router.post('/airports/add', authenticateToken, verifyAdmin, addAirport);
+router.post('/airlines/add', authenticateToken, verifyAdmin, addAirline);
+
+// — Authenticated Users —
 router.post('/bookings', authenticateToken, bookFlight);
+router.get('/bookings', authenticateToken, fetchUserBookings);
 router.delete('/bookings/:id', authenticateToken, deleteBooking);
-router.post('/flights/add', authenticateToken, addFlight);
-router.get('/airports', authenticateToken, listAirports);
-router.post('/airports/add', authenticateToken, addAirport);
-router.get('/airlines', authenticateToken, listAirlines);
-router.post('/airlines/add', authenticateToken, addAirline);
 
 export default router;
-
