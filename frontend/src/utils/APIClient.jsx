@@ -61,6 +61,43 @@ const api = {
         console.log('Removing Auth Header'); // Debug log
         delete axiosClient.defaults.headers.common['Authorization'];
     },
+    delete: (url) => {
+        const token = localStorage.getItem('token');
+        console.log('DELETE Request to:', url);
+        return axiosClient
+            .delete(url, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then((response) => {
+                console.log('DELETE Response:', response.data);
+                return response.data;
+            })
+            .catch((error) => {
+                console.error('DELETE Error:', error);
+                throw error;
+            });
+    },
+    patch: (url, data) => {
+        const token = localStorage.getItem('token');
+        console.log('PATCH Request to:', url);
+        console.log('Payload:', data);
+        return axiosClient
+            .patch(url, data, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then((response) => {
+                console.log('PATCH Response:', response.data);
+                return response.data;
+            })
+            .catch((error) => {
+                console.error('PATCH Error:', error);
+                throw error;
+            });
+    }
 };
 
 export default api;
