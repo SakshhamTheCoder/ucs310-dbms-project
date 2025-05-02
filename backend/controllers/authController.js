@@ -1,20 +1,36 @@
+// controllers/authController.js
 import sqlQuery from '../utils/db.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
 export const register = async (req, res) => {
   const { username, email, password, phone, passport } = req.body;
+
+  // 1) Required field checks
+  if (!username || !email || !password) {
+    return res.status(400).json({
+      message: 'Username, email, and password are all required'
+    });
+  }
+
+  // 2) Password length check
+  if (password.length < 8) {
+    return res.status(400).json({
+      message: 'Password must be at least 8 characters long'
+    });
+  }
+
   try {
-    // Prevent duplicate emails
+    // 3) Prevent duplicate emails
     const existing = await sqlQuery(
       'SELECT 1 FROM users WHERE email = ?',
       [email]
     );
     if (existing.length) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: 'Email already registered' });
     }
 
-    // Hash password and insert
+    // 4) Hash & insert
     const hashed = await bcrypt.hash(password, 10);
     const insertSql = `
       INSERT INTO users
@@ -25,11 +41,11 @@ export const register = async (req, res) => {
       username,
       email,
       hashed,
-      phone,
-      passport,
+      phone || null,
+      passport || null
     ]);
 
-    // Sign token (include username for role checks)
+    // 5) Sign and return token
     const token = jwt.sign(
       { id: result.insertId, username },
       process.env.JWT_SECRET,
@@ -38,7 +54,7 @@ export const register = async (req, res) => {
 
     return res.status(201).json({
       token,
-      user: { id: result.insertId, username, email },
+      user: { id: result.insertId, username, email }
     });
   } catch (err) {
     console.error('Registration Error:', err);
@@ -53,35 +69,28 @@ export const login = async (req, res) => {
   const loginId = email || username;
 
   if (!loginId || !password) {
-    return res
-      .status(400)
-      .json({ message: 'Please provide email or username and password.' });
+    return res.status(400).json({
+      message: 'Please provide email (or username) and password'
+    });
   }
 
-  console.log('Login attempt for:', loginId);
-
   try {
-    // Lookup by email OR username
     const users = await sqlQuery(
       'SELECT * FROM users WHERE email = ? OR username = ?',
       [loginId, loginId]
     );
-    console.log('Users found:', users.length);
-
-    if (users.length === 0) {
-      return res
-        .status(401)
-        .json({ message: 'Invalid email/username or password' });
+    if (!users.length) {
+      return res.status(401).json({
+        message: 'Invalid email/username or password'
+      });
     }
 
     const user = users[0];
     const match = await bcrypt.compare(password, user.password);
-    console.log('Password match:', match);
-
     if (!match) {
-      return res
-        .status(401)
-        .json({ message: 'Invalid email/username or password' });
+      return res.status(401).json({
+        message: 'Invalid email/username or password'
+      });
     }
 
     const token = jwt.sign(
@@ -95,8 +104,8 @@ export const login = async (req, res) => {
       user: {
         id: user.user_id,
         username: user.username,
-        email: user.email,
-      },
+        email: user.email
+      }
     });
   } catch (err) {
     console.error('Login Error:', err);
@@ -127,8 +136,8 @@ export const me = async (req, res) => {
         id: u.user_id,
         username: u.username,
         email: u.email,
-        phone: u.phone_number,
-      },
+        phone: u.phone_number
+      }
     });
   } catch (err) {
     console.error('Auth Error:', err);

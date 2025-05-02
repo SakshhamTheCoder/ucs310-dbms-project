@@ -1,25 +1,31 @@
+// routes/servicesRoutes.js
 import express from 'express';
 import {
-  authenticateToken,
-  verifyAdmin
-} from '../middleware/authMiddleware.js';
-import {
-  createService,
   listServices,
+  createService,
   addServiceToBooking,
   listBookingServices,
   removeServiceFromBooking
 } from '../controllers/servicesController.js';
+import {
+  authenticateToken,
+  verifyAdmin
+} from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// Public: list all services
+// Public
 router.get('/services', listServices);
 
-// Admin: manage master services
-router.post('/services', authenticateToken, verifyAdmin, createService);
+// Admin
+router.post(
+  '/services',
+  authenticateToken,
+  verifyAdmin,
+  createService
+);
 
-// User: add/list/remove services per booking
+// User
 router.post(
   '/bookings/:bid/services',
   authenticateToken,
