@@ -13,7 +13,7 @@ import MyBookings from "./pages/MyBookings";
 import { useAuth } from "./utils/AuthContext";
 import Navbar from "./components/Navbar";
 import Admin from "./pages/Admin";
-
+import AdminCrew from "./pages/AdminCrew";
 const App = () => {
     const { isLoggedIn, loading } = useAuth();
 
@@ -30,6 +30,7 @@ const App = () => {
                     <Route path="/flights" element={isLoggedIn ? <Flights /> : <Navigate to="/login" />} />
                     <Route path="/my-bookings" element={isLoggedIn ? <MyBookings /> : <Navigate to="/login" />} />
                     <Route path="/admin" element={isLoggedIn ? <Admin /> : <Navigate to="/" />} />
+                    <Route path="/admin/crew" element={isLoggedIn ? <AdminCrew /> : <Navigate to="/" />} />
                 </Routes>
             </Router>
         </div>
