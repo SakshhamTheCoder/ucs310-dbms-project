@@ -209,6 +209,101 @@ const initDb = async () => {
     `);
     console.log('Notifications table OK');
 
+      // 1. Crew Members
+    await sqlQuery(`
+      CREATE TABLE IF NOT EXISTS crew_members (
+        crew_id     INT AUTO_INCREMENT PRIMARY KEY,
+        name        VARCHAR(100) NOT NULL,
+        role        ENUM('Pilot','CoPilot','CabinCrew') NOT NULL,
+        license_no  VARCHAR(50) UNIQUE,
+        contact     VARCHAR(100),
+        hired_date  DATE,
+        status      ENUM('Active','OnLeave','Retired') DEFAULT 'Active',
+        created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('Crew_members table OK');
+
+    await sqlQuery(`
+      CREATE TABLE IF NOT EXISTS crew_assignments (
+        assignment_id INT AUTO_INCREMENT PRIMARY KEY,
+        flight_id     INT NOT NULL,
+        crew_id       INT NOT NULL,
+        assigned_role ENUM('Pilot','CoPilot','CabinCrew') NOT NULL,
+        assigned_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (flight_id) REFERENCES flights(flight_id) ON DELETE CASCADE,
+        FOREIGN KEY (crew_id)   REFERENCES crew_members(crew_id) ON DELETE CASCADE,
+        UNIQUE(flight_id, crew_id, assigned_role)
+      )
+    `);
+    console.log('Crew_assignments table OK');
+
+    // 2. Gates & Gate Assignments
+    await sqlQuery(`
+      CREATE TABLE IF NOT EXISTS gates (
+        gate_id      INT AUTO_INCREMENT PRIMARY KEY,
+        terminal     VARCHAR(10) NOT NULL,
+        gate_number  VARCHAR(10) NOT NULL,
+        status       ENUM('Open','Closed','Maintenance') DEFAULT 'Open',
+        created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(terminal, gate_number)
+      )
+    `);
+    console.log('Gates table OK');
+
+    await sqlQuery(`
+      CREATE TABLE IF NOT EXISTS gate_assignments (
+        id           INT AUTO_INCREMENT PRIMARY KEY,
+        flight_id    INT NOT NULL,
+        gate_id      INT NOT NULL,
+        assigned_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (flight_id) REFERENCES flights(flight_id) ON DELETE CASCADE,
+        FOREIGN KEY (gate_id)   REFERENCES gates(gate_id)     ON DELETE CASCADE,
+        UNIQUE(flight_id)
+      )
+    `);
+    console.log('Gate_assignments table OK');
+
+    // 3. Lounges & Access
+    await sqlQuery(`
+      CREATE TABLE IF NOT EXISTS lounges (
+        lounge_id   INT AUTO_INCREMENT PRIMARY KEY,
+        name        VARCHAR(100) NOT NULL,
+        location    VARCHAR(100) NOT NULL,
+        capacity    INT NOT NULL,
+        created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('Lounges table OK');
+
+    await sqlQuery(`
+      CREATE TABLE IF NOT EXISTS lounge_access (
+        access_id   INT AUTO_INCREMENT PRIMARY KEY,
+        booking_id  INT NOT NULL,
+        lounge_id   INT NOT NULL,
+        access_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (booking_id) REFERENCES bookings(booking_id) ON DELETE CASCADE,
+        FOREIGN KEY (lounge_id)  REFERENCES lounges(lounge_id)    ON DELETE CASCADE,
+        UNIQUE(booking_id, lounge_id)
+      )
+    `);
+    console.log('Lounge_access table OK');
+
+    // 4. Feedback / Reviews
+    await sqlQuery(`
+      CREATE TABLE IF NOT EXISTS reviews (
+        review_id    INT AUTO_INCREMENT PRIMARY KEY,
+        passenger_id INT NOT NULL,
+        flight_id    INT NOT NULL,
+        rating       TINYINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+        comment      TEXT,
+        created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (passenger_id) REFERENCES passengers(passenger_id) ON DELETE CASCADE,
+        FOREIGN KEY (flight_id)    REFERENCES flights(flight_id)         ON DELETE CASCADE
+      )
+    `);
+    console.log('Reviews table OK');
+
     console.log('Database initialized successfully!');
   } catch (err) {
     console.error('Error initializing database:', err);
