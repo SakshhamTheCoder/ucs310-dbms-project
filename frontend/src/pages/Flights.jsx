@@ -8,6 +8,7 @@ const Flights = () => {
     const [bookings, setBookings] = useState([]); // To store user's bookings
     const { user } = useAuth();
     const navigate = useNavigate();
+    const [crewMap, setCrewMap] = useState({});
 
     // Fetch all flights and user's bookings
     useEffect(() => {
@@ -35,6 +36,23 @@ const Flights = () => {
                 // Set flights and bookings
                 setFlights(flightsResponse.data);
                 setBookings(bookingsResponse.data);
+
+                // Fetch crew for each flight
+                const crewPromises = flightsResponse.data.map((flight) =>
+                    axios.get(`http://localhost:3000/api/flights/${flight.flight_id}/crew`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    })
+                );
+                const crewResults = await Promise.allSettled(crewPromises);
+                const map = {};
+                flightsResponse.data.forEach((flight, idx) => {
+                    if (crewResults[idx].status === 'fulfilled') {
+                        map[flight.flight_id] = crewResults[idx].value.data || [];
+                    } else {
+                        map[flight.flight_id] = [];
+                    }
+                });
+                setCrewMap(map);
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -105,6 +123,16 @@ const Flights = () => {
                             <p className="text-gray-600">
                                 Terminal: {flight.terminal || 'N/A'}
                             </p>
+                            {crewMap[flight.flight_id] && crewMap[flight.flight_id].length > 0 && (
+                                <div className="mt-2">
+                                    <p className="font-semibold">Assigned Crew:</p>
+                                    <ul className="list-disc ml-6">
+                                        {crewMap[flight.flight_id].map((c) => (
+                                            <li key={c.crew_id}>{c.name} ({c.assigned_role})</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                             <button
                                 onClick={() => handleBookNow(flight.flight_id)}
                                 className="bg-blue-500 text-white px-4 py-2 rounded mt-2"

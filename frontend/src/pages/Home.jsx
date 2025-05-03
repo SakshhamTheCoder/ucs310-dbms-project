@@ -6,6 +6,8 @@ const Home = () => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [notifications, setNotifications] = useState([]);
+    const [loadingNotifications, setLoadingNotifications] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -28,16 +30,41 @@ const Home = () => {
                     },
                 });
                 setBookings(bookingsResponse.data);
+
+                // Fetch notifications
+                const notifResponse = await axios.get("http://localhost:3000/api/notifications", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setNotifications(notifResponse.data);
             } catch (err) {
                 console.error("Error fetching data:", err);
                 setError(err.message);
             } finally {
                 setLoading(false);
+                setLoadingNotifications(false);
             }
         };
 
         fetchData();
     }, []);
+
+    const markAsRead = async (notificationId) => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.patch(`http://localhost:3000/api/notifications/${notificationId}/read`, {}, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setNotifications((prev) =>
+                prev.map((n) =>
+                    n.notification_id === notificationId ? { ...n, is_read: 1 } : n
+                )
+            );
+        } catch (err) {
+            // ignore
+        }
+    };
 
     if (loading) {
         return <div className="container mx-auto p-4">Loading...</div>;
@@ -49,6 +76,32 @@ const Home = () => {
 
     return (
         <div className="container mx-auto p-4">
+            {/* Notification Center */}
+            <div className="mb-6">
+                <h2 className="text-2xl font-bold mb-2">Notifications</h2>
+                {loadingNotifications ? (
+                    <div>Loading notifications...</div>
+                ) : notifications.length === 0 ? (
+                    <div className="text-gray-500">No notifications.</div>
+                ) : (
+                    <ul className="space-y-2">
+                        {notifications.map((notif) => (
+                            <li key={notif.notification_id} className={`p-3 rounded shadow flex items-center justify-between ${notif.is_read ? 'bg-gray-100' : 'bg-blue-100'}`}>
+                                <div>
+                                    <span className={notif.is_read ? 'text-gray-600' : 'font-semibold text-blue-900'}>{notif.message}</span>
+                                    <span className="ml-2 text-xs text-gray-400">{new Date(notif.created_at).toLocaleString()}</span>
+                                </div>
+                                {!notif.is_read && (
+                                    <button className="ml-4 px-2 py-1 bg-blue-500 text-white rounded" onClick={() => markAsRead(notif.notification_id)}>
+                                        Mark as Read
+                                    </button>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
+
             <h1 className="text-3xl font-bold mb-4">Welcome, {user ? user.username : "Guest"}!</h1>
 
             {/* User Info Section */}
