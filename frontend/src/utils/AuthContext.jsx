@@ -8,13 +8,14 @@ const AuthContext = React.createContext({
     logout: () => { },
     user: null,
     loading: true,
+    isAdmin: false,
 });
 
 export const AuthContextProvider = (props) => {
     const [userIsLoggedIn, setUserIsLoggedIn] = useState(null);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-
+    const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -30,6 +31,7 @@ export const AuthContextProvider = (props) => {
                     console.log('User data fetched:', response);
                     setUser(response.user);
                     setUserIsLoggedIn(true);
+                    setIsAdmin(response.user && response.user.role === 'admin');
                 })
                 .catch((error) => {
                     console.error('Token verification failed:', error);
@@ -57,9 +59,13 @@ export const AuthContextProvider = (props) => {
 
             setUserIsLoggedIn(true);
             setUser(user);
+            setIsAdmin(user && user.role === 'admin');
             console.log('User state set:', user);
+            
+            return response;
         } catch (error) {
             console.error('Registration failed:', error);
+            // Pass the error through so the component can handle it
             throw error;
         }
     };
@@ -75,9 +81,13 @@ export const AuthContextProvider = (props) => {
 
             setUserIsLoggedIn(true);
             setUser(user);
+            setIsAdmin(user && user.role === 'admin');
             console.log('User state set:', user);
+            
+            return response;
         } catch (error) {
             console.error('Login failed:', error);
+            // Pass the error through so the component can handle it
             throw error;
         }
     };
@@ -87,6 +97,7 @@ export const AuthContextProvider = (props) => {
         api.removeAuthHeader();
         setUserIsLoggedIn(false);
         setUser(null);
+        setIsAdmin(false);
     };
 
     const contextValue = {
@@ -96,6 +107,7 @@ export const AuthContextProvider = (props) => {
         logout: logoutHandler,
         user: user,
         loading: loading,
+        isAdmin: isAdmin,
     };
 
     console.log('AuthContext state:', contextValue);

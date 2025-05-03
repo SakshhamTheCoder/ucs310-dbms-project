@@ -14,13 +14,13 @@ export const authenticateToken = (req, res, next) => {
         .status(403)
         .json({ message: 'Invalid or expired token' });
     }
-    req.user = decoded; // { id, username }
+    req.user = decoded; // { id, username, role }
     next();
   });
 };
 
 export const verifyAdmin = (req, res, next) => {
-  if (req.user?.username !== 'Admin') {
+  if (req.user?.role !== 'admin') {
     return res
       .status(403)
       .json({ message: 'Access denied: Admins only' });

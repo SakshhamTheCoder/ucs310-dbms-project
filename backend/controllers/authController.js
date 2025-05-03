@@ -30,31 +30,35 @@ export const register = async (req, res) => {
       return res.status(400).json({ message: 'Email already registered' });
     }
 
+    // Default role is 'user', not admin
+    const role = 'user';
+
     // 4) Hash & insert
     const hashed = await bcrypt.hash(password, 10);
     const insertSql = `
       INSERT INTO users
-        (username, email, password, phone_number, passport_number)
-      VALUES (?, ?, ?, ?, ?)
+        (username, email, password, phone_number, passport_number, role)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
     const result = await sqlQuery(insertSql, [
       username,
       email,
       hashed,
       phone || null,
-      passport || null
+      passport || null,
+      role
     ]);
 
     // 5) Sign and return token
     const token = jwt.sign(
-      { id: result.insertId, username },
+      { id: result.insertId, username, role },
       process.env.JWT_SECRET,
       { expiresIn: '1y' }
     );
 
     return res.status(201).json({
       token,
-      user: { id: result.insertId, username, email }
+      user: { id: result.insertId, username, email, role }
     });
   } catch (err) {
     console.error('Registration Error:', err);
@@ -93,8 +97,11 @@ export const login = async (req, res) => {
       });
     }
 
+    // Check if user has a role, default to 'user' if not
+    const role = user.role || 'user';
+
     const token = jwt.sign(
-      { id: user.user_id, username: user.username },
+      { id: user.user_id, username: user.username, role },
       process.env.JWT_SECRET,
       { expiresIn: '1y' }
     );
@@ -104,7 +111,8 @@ export const login = async (req, res) => {
       user: {
         id: user.user_id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        role
       }
     });
   } catch (err) {
@@ -124,7 +132,7 @@ export const me = async (req, res) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const rows = await sqlQuery(
-      'SELECT user_id, username, email, phone_number FROM users WHERE user_id = ?',
+      'SELECT user_id, username, email, phone_number, role FROM users WHERE user_id = ?',
       [decoded.id]
     );
     if (!rows.length) {
@@ -136,7 +144,8 @@ export const me = async (req, res) => {
         id: u.user_id,
         username: u.username,
         email: u.email,
-        phone: u.phone_number
+        phone: u.phone_number,
+        role: u.role || 'user'
       }
     });
   } catch (err) {

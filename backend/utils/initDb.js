@@ -15,19 +15,43 @@ const initDb = async () => {
         email           VARCHAR(100) UNIQUE NOT NULL,
         password        VARCHAR(255) NOT NULL,
         phone_number    VARCHAR(20),
-        passport_number VARCHAR(50) UNIQUE
+        passport_number VARCHAR(50) UNIQUE,
+        role            VARCHAR(10) DEFAULT 'user'
       )
     `);
     console.log('Users table OK');
+
+    // ALTER to add role column if missing (graceful migration)
+    try {
+      await sqlQuery(`
+        ALTER TABLE users
+        ADD COLUMN role VARCHAR(10) DEFAULT 'user'
+      `);
+      console.log('Added role column to users table');
+
+      // Update existing Admin user if role column was just added
+      await sqlQuery(`
+        UPDATE users
+        SET role = 'admin'
+        WHERE username = 'Admin'
+      `);
+      console.log('Updated Admin role');
+    } catch (err) {
+      if (err.code === 'ER_DUP_FIELDNAME') {
+        console.log('role column already exists in users table — skipping ALTER');
+      } else {
+        throw err;
+      }
+    }
 
     // Seed admin user (with updated credentials)
     const hashedPassword = await bcrypt.hash('BossPass!2', 10);
     await sqlQuery(
       `INSERT INTO users (
-         username, email, password, phone_number, passport_number
-       ) VALUES (?,?,?,?,?)
-       ON DUPLICATE KEY UPDATE username = username`,
-      ['Admin', 'boss@flightcorp.com', hashedPassword, '9001122334', 'B123456']
+         username, email, password, phone_number, passport_number, role
+       ) VALUES (?,?,?,?,?,?)
+       ON DUPLICATE KEY UPDATE username = username, role = 'admin'`,
+      ['Admin', 'boss@flightcorp.com', hashedPassword, '9001122334', 'B123456', 'admin']
     );
     console.log('Admin user OK');
 
@@ -215,7 +239,7 @@ const initDb = async () => {
         crew_id     INT AUTO_INCREMENT PRIMARY KEY,
         name        VARCHAR(100) NOT NULL,
         role        ENUM('Pilot','CoPilot','CabinCrew') NOT NULL,
-        license_no  VARCHAR(50) UNIQUE,
+        license_number  VARCHAR(50) UNIQUE,
         contact     VARCHAR(100),
         hired_date  DATE,
         status      ENUM('Active','OnLeave','Retired') DEFAULT 'Active',
@@ -223,6 +247,32 @@ const initDb = async () => {
       )
     `);
     console.log('Crew_members table OK');
+
+    // Add migration to rename license_no to license_number if needed
+    try {
+      await sqlQuery(`
+        ALTER TABLE crew_members 
+        CHANGE COLUMN license_no license_number VARCHAR(50) UNIQUE
+      `);
+      console.log('Renamed license_no to license_number if existed');
+    } catch (err) {
+      console.log('Column rename not needed or already done');
+    }
+
+    // Add contact column if it doesn't exist
+    try {
+      await sqlQuery(`
+        ALTER TABLE crew_members
+        ADD COLUMN contact VARCHAR(100)
+      `);
+      console.log('Added contact column to crew_members table');
+    } catch (err) {
+      if (err.code === 'ER_DUP_FIELDNAME') {
+        console.log('contact column already exists in crew_members table — skipping ALTER');
+      } else {
+        console.log('Error adding contact column:', err.message);
+      }
+    }
 
     await sqlQuery(`
       CREATE TABLE IF NOT EXISTS crew_assignments (

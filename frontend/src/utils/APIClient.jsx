@@ -26,6 +26,10 @@ const api = {
             })
             .catch((error) => {
                 console.error('GET Error:', error); // Debug log
+                // Log the actual error message from the server
+                if (error.response && error.response.data) {
+                    console.error('Server error message:', error.response.data);
+                }
                 throw error;
             });
     },
@@ -48,6 +52,10 @@ const api = {
             })
             .catch((error) => {
                 console.error('POST Error:', error); // Debug log
+                // Log the actual error message from the server
+                if (error.response && error.response.data) {
+                    console.error('Server error message:', error.response.data);
+                }
                 throw error;
             });
     },
@@ -76,6 +84,10 @@ const api = {
             })
             .catch((error) => {
                 console.error('DELETE Error:', error);
+                // Log the actual error message from the server
+                if (error.response && error.response.data) {
+                    console.error('Server error message:', error.response.data);
+                }
                 throw error;
             });
     },
@@ -95,6 +107,10 @@ const api = {
             })
             .catch((error) => {
                 console.error('PATCH Error:', error);
+                // Log the actual error message from the server
+                if (error.response && error.response.data) {
+                    console.error('Server error message:', error.response.data);
+                }
                 throw error;
             });
     }
