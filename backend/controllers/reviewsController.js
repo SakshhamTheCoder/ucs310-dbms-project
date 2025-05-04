@@ -67,3 +67,40 @@ export const deleteReview = async (req, res) => {
     res.status(500).json({ message: 'Server error deleting review' });
   }
 };
+
+export const listRecentReviews = async (req, res) => {
+  try {
+    const rows = await sqlQuery(
+      `SELECT r.review_id, r.rating, r.comment, r.created_at,
+              p.name AS passenger_name,
+              CONCAT(dep.airport_name, ' → ', arr.airport_name) AS flight_route
+         FROM reviews r
+         JOIN passengers p ON r.passenger_id = p.passenger_id
+         JOIN flights f ON r.flight_id = f.flight_id
+         JOIN airports dep ON f.departure_station = dep.airport_id
+         JOIN airports arr ON f.arrival_station = arr.airport_id
+        ORDER BY r.created_at DESC
+        LIMIT 10`,
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('List Recent Reviews Error:', err);
+    res.status(500).json({ message: 'Server error listing recent reviews' });
+  }
+};
+
+export const listAllReviews = async (req, res) => {
+  try {
+    const rows = await sqlQuery(
+      `SELECT r.review_id, r.flight_id, r.rating, r.comment, r.created_at,
+              p.name AS passenger_name
+         FROM reviews r
+         JOIN passengers p ON r.passenger_id = p.passenger_id
+        ORDER BY r.created_at DESC`,
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('List All Reviews Error:', err);
+    res.status(500).json({ message: 'Server error listing all reviews' });
+  }
+};

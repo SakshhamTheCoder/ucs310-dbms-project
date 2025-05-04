@@ -9,6 +9,7 @@ import {
   addAirport,
   listAirlines,
   addAirline,
+  getBookingsByUsername,
 } from '../controllers/flightController.js';
 import {
   authenticateToken,
@@ -31,5 +32,6 @@ router.post('/airlines/add', authenticateToken, verifyAdmin, addAirline);
 router.post('/bookings', authenticateToken, bookFlight);
 router.get('/bookings', authenticateToken, fetchUserBookings);
 router.delete('/bookings/:id', authenticateToken, deleteBooking);
+router.get('/bookings/search', authenticateToken, verifyAdmin, getBookingsByUsername);
 
 export default router;

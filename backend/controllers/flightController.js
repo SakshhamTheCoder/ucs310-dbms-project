@@ -169,3 +169,26 @@ export const addAirport = async (req, res) => {
     }
 };
 
+
+export const getBookingsByUsername = async (req, res) => {
+    const { username } = req.query;
+  
+    try {
+      const bookings = await sqlQuery(`
+        SELECT b.booking_id, f.flight_id, f.departure_time, f.arrival_time,
+               dep.airport_name AS departure_airport, 
+               arr.airport_name AS arrival_airport
+        FROM bookings b
+        JOIN users u ON b.user_id = u.user_id
+        JOIN flights f ON b.flight_id = f.flight_id
+        JOIN airports dep ON f.departure_station = dep.airport_id
+        JOIN airports arr ON f.arrival_station = arr.airport_id
+        WHERE u.username = ?
+      `, [username]);
+  
+      res.json(bookings);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Server error' });
+    }
+  };

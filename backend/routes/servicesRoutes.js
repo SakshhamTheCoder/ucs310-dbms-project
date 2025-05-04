@@ -1,16 +1,14 @@
-// routes/servicesRoutes.js
 import express from 'express';
 import {
   listServices,
   createService,
   addServiceToBooking,
   listBookingServices,
-  removeServiceFromBooking
+  removeServiceFromBooking,
+  updateService,
+  listAllServiceOrders
 } from '../controllers/servicesController.js';
-import {
-  authenticateToken,
-  verifyAdmin
-} from '../middleware/authMiddleware.js';
+import { authenticateToken, verifyAdmin } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -23,6 +21,12 @@ router.post(
   authenticateToken,
   verifyAdmin,
   createService
+);
+router.patch(
+  '/services/:id',
+  authenticateToken,
+  verifyAdmin,
+  updateService
 );
 
 // User
@@ -40,6 +44,13 @@ router.delete(
   '/bookings/:bid/services/:id',
   authenticateToken,
   removeServiceFromBooking
+);
+
+router.get(
+  '/service-orders/all',
+  authenticateToken,
+  verifyAdmin,
+  listAllServiceOrders
 );
 
 export default router;
