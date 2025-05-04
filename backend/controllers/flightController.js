@@ -62,24 +62,26 @@ export const bookFlight = async (req, res) => {
             user_id,
             flightId,
         ]);
-
+        const fprice=await sqlQuery('SELECT price FROM flights WHERE flight_id = ?',[flightId]);
         if (existingBooking.length > 0) {
             return res.status(400).json({ message: 'You have already booked this flight' });
         }
-
+        
         const result = await sqlQuery(
             `
-            INSERT INTO bookings (user_id, flight_id) VALUES (?, ?)
+            INSERT INTO bookings (user_id, flight_id,total_price) VALUES (?, ?, ?)
         `,
-            [user_id, flightId]
+            [user_id, flightId,fprice[0]['price']]
         );
-
         res.status(201).json({ message: 'Booking successful', booking_id: result.insertId });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+
+  
 
 export const deleteBooking = async (req, res) => {
     const bookingId = req.params.id;
@@ -121,19 +123,19 @@ export const addAirline = async (req, res) => {
 };
 
 export const addFlight = async (req, res) => {
-    const { departureStation, arrivalStation, airlineId, departureTime, arrivalTime, terminal } = req.body;
+    const { departureStation, arrivalStation, airlineId, departureTime, arrivalTime, terminal,price } = req.body;
 
-    if (!departureStation || !arrivalStation || !airlineId || !departureTime || !arrivalTime || !terminal) {
+    if (!departureStation || !arrivalStation || !airlineId || !departureTime || !arrivalTime || !terminal||!price) {
         return res.status(400).json({ message: 'All fields are required' });
     }
 
     try {
         const result = await sqlQuery(
             `
-            INSERT INTO flights (departure_station, arrival_station, airline_id, departure_time, arrival_time, terminal)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO flights (departure_station, arrival_station, airline_id, departure_time, arrival_time, terminal,price)
+            VALUES (?, ?, ?, ?, ?, ?,?)
         `,
-            [departureStation, arrivalStation, airlineId, departureTime, arrivalTime, terminal]
+            [departureStation, arrivalStation, airlineId, departureTime, arrivalTime, terminal, price]
         );
 
         res.status(201).json({ message: 'Flight added successfully', flight_id: result.insertId });

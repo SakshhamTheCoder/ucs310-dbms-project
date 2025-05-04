@@ -84,6 +84,7 @@ const initDb = async () => {
         arrival_station    INT,
         terminal           VARCHAR(50),
         airline_id         INT,
+        price              INT,
         FOREIGN KEY (departure_station)
           REFERENCES airports(airport_id) ON DELETE SET NULL,
         FOREIGN KEY (arrival_station)
@@ -100,11 +101,15 @@ const initDb = async () => {
         booking_id   INT AUTO_INCREMENT PRIMARY KEY,
         user_id      INT,
         flight_id    INT,
+        total_price  INT,
+        service_id   INT,
         booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id)
           REFERENCES users(user_id) ON DELETE CASCADE,
         FOREIGN KEY (flight_id)
-          REFERENCES flights(flight_id) ON DELETE CASCADE
+          REFERENCES flights(flight_id) ON DELETE CASCADE,
+        FOREIGN KEY (service_id)
+          REFERENCES flights(service_id) ON DELETE CASCADE
       )
     `);
     console.log('Bookings table OK');
@@ -165,7 +170,7 @@ const initDb = async () => {
         FOREIGN KEY (booking_id)
           REFERENCES bookings(booking_id) ON DELETE CASCADE,
         FOREIGN KEY (service_id)
-          REFERENCES services(service_id) ON DELETE RESTRICT
+          REFERENCES services(service_id) ON DELETE CASCADE
       )
     `);
     console.log('Booking_Services table OK');

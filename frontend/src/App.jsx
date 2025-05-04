@@ -15,7 +15,7 @@ import Navbar from "./components/Navbar";
 import Admin from "./pages/Admin";
 import AdminCrew from "./pages/AdminCrew";
 import ProtectedRoute from "./components/ProtectedRoute";
-
+import AddService from "./pages/AddService";
 const App = () => {
     const { loading, isLoggedIn, isAdmin } = useAuth();
 
@@ -60,6 +60,11 @@ const App = () => {
                     <Route path="/admin/crew" element={
                         <ProtectedRoute requiredRole="admin">
                             <AdminCrew />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/admin/service" element={
+                        <ProtectedRoute requiredRole="admin">
+                            <AddService />
                         </ProtectedRoute>
                     } />
                 </Routes>

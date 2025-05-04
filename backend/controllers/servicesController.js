@@ -41,6 +41,23 @@ export const createService = async (req, res) => {
     res.status(500).json({ message: 'Server error creating service' });
   }
 };
+// Admin: delete a service
+export const deleteService = async (req, res) => {
+  const id = Number(req.params.id);
+  try {
+    // Optional: check if service exists
+    const existing = await sqlQuery('SELECT * FROM services WHERE service_id = ?', [id]);
+    if (!existing.length) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+
+    await sqlQuery('DELETE FROM services WHERE service_id = ?', [id]);
+    res.json({ message: 'Service deleted successfully' });
+  } catch (err) {
+    console.error('Delete Service Error:', err);
+    res.status(500).json({ message: 'Server error deleting service' });
+  }
+};
 
 // User: add to booking, decrement stock
 export const addServiceToBooking = async (req, res) => {
