@@ -6,7 +6,8 @@ import {
   listBookingServices,
   removeServiceFromBooking,
   updateService,
-  listAllServiceOrders
+  listAllServiceOrders,
+  deleteService
 } from '../controllers/servicesController.js';
 import { authenticateToken, verifyAdmin } from '../middleware/authMiddleware.js';
 
@@ -27,6 +28,13 @@ router.patch(
   authenticateToken,
   verifyAdmin,
   updateService
+);
+// Admin - Delete service
+router.delete(
+  '/services/:id',
+  authenticateToken,
+  verifyAdmin,
+  deleteService
 );
 
 // User
