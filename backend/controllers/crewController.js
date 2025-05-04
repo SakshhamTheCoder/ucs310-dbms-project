@@ -1,3 +1,4 @@
+// controllers/crewController.js
 import sqlQuery from '../utils/db.js';
 
 export const listCrew = async (_req, res) => {
@@ -11,18 +12,28 @@ export const listCrew = async (_req, res) => {
 };
 
 export const addCrew = async (req, res) => {
-  const { name, role, license_no, contact, hired_date } = req.body;
+  let { name, role, license_no, license_number, contact, hired_date } = req.body;
+
+  // Required fields
   if (!name || !role) {
     return res.status(400).json({ message: 'Name and role are required' });
   }
+
+  // Map legacy license_no to license_number
+  if (!license_number && license_no) {
+    license_number = license_no;
+  }
+
   try {
     const result = await sqlQuery(
       `INSERT INTO crew_members
-         (name, role, license_no, contact, hired_date)
+         (name, role, license_number, contact, hired_date)
        VALUES (?, ?, ?, ?, ?)`,
-      [name, role, license_no || null, contact || null, hired_date || null]
+      [name, role, license_number || null, contact || null, hired_date || null]
     );
-    res.status(201).json({ message: 'Crew member added', crew_id: result.insertId });
+    res
+      .status(201)
+      .json({ message: 'Crew member added', crew_id: result.insertId });
   } catch (err) {
     console.error('Add Crew Error:', err);
     res.status(500).json({ message: 'Server error adding crew' });
@@ -68,7 +79,9 @@ export const assignCrew = async (req, res) => {
        VALUES (?, ?, ?)`,
       [flightId, crew_id, assigned_role]
     );
-    res.status(201).json({ message: 'Crew assigned', assignment_id: result.insertId });
+    res
+      .status(201)
+      .json({ message: 'Crew assigned', assignment_id: result.insertId });
   } catch (err) {
     console.error('Assign Crew Error:', err);
     res.status(500).json({ message: 'Server error assigning crew' });

@@ -164,3 +164,63 @@ export const removeServiceFromBooking = async (req, res) => {
     res.status(500).json({ message: 'Server error removing service' });
   }
 };
+
+// Admin: update an existing service
+export const updateService = async (req, res) => {
+  const id = Number(req.params.id);
+  const { name, description, price, available_quantity } = req.body;
+
+  // At least one field must be provided
+  if (
+    name  === undefined &&
+    description === undefined &&
+    price === undefined &&
+    available_quantity === undefined
+  ) {
+    return res
+      .status(400)
+      .json({ message: 'At least one field is required to update' });
+  }
+
+  try {
+    await sqlQuery(
+      `UPDATE services
+          SET
+            name               = COALESCE(?, name),
+            description        = COALESCE(?, description),
+            price              = COALESCE(?, price),
+            available_quantity = COALESCE(?, available_quantity)
+        WHERE service_id = ?`,
+      [
+        name,
+        description,
+        price,
+        available_quantity,
+        id
+      ]
+    );
+    return res.json({ message: 'Service updated successfully' });
+  } catch (err) {
+    console.error('Update Service Error:', err);
+    return res.status(500).json({ message: 'Server error updating service' });
+  }
+};
+
+export const listAllServiceOrders = async (req, res) => {
+  try {
+    const rows = await sqlQuery(`
+      SELECT bs.id, bs.booking_id, bs.quantity, bs.added_at,
+             s.name AS service_name, s.price,
+             u.username 
+        FROM booking_services bs
+        JOIN services s ON bs.service_id = s.service_id
+        JOIN bookings b ON bs.booking_id = b.booking_id
+        JOIN users u ON b.user_id = u.user_id
+       ORDER BY bs.added_at DESC
+    `);
+    res.json(rows);
+  } catch (err) {
+    console.error('List All Service Orders Error:', err);
+    res.status(500).json({ message: 'Server error listing service orders' });
+  }
+};

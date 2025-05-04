@@ -4,7 +4,8 @@ import {
   addLounge,
   assignLounge,
   listMyLounges,
-  removeLoungeAccess
+  removeLoungeAccess,
+  listAllLoungeAccess
 } from '../controllers/loungeController.js';
 import { authenticateToken, verifyAdmin } from '../middleware/authMiddleware.js';
 
@@ -15,6 +16,7 @@ router.get('/lounges', listLounges);
 
 // Admin
 router.post('/lounges', authenticateToken, verifyAdmin, addLounge);
+router.get('/lounge-access/all', authenticateToken, verifyAdmin, listAllLoungeAccess);
 
 // User
 router.post('/bookings/:bid/lounges', authenticateToken, assignLounge);
