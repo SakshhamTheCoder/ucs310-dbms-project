@@ -44,8 +44,9 @@ const AdminDashboard = () => {
   const dispatch = useDispatch();
   const { flights, airports, airlines, routes, loading: flightsLoading } = useSelector(state => state.flights);
   const { services, loading: servicesLoading } = useSelector(state => state.services);
-  const { gates, lounges, notifications, payments, loading: adminLoading } = useSelector(state => state.admin);
+  const { gates, lounges, notifications, loading: adminLoading } = useSelector(state => state.admin);
   const { user } = useSelector(state => state.auth);
+  const { payments, loading: loadingPayments } = useSelector(state => state.payments);
 
   const [tabValue, setTabValue] = useState(0);
 
@@ -57,8 +58,6 @@ const AdminDashboard = () => {
   const [openGateModal, setOpenGateModal] = useState(false);
   const [openLoungeModal, setOpenLoungeModal] = useState(false);
 
-  const [paymentList, setPaymentList] = useState([]);
-  const [loadingPayments, setLoadingPayments] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
 
@@ -96,12 +95,7 @@ const AdminDashboard = () => {
   const handleUpdatePaymentStatus = async (status) => {
     if (!selectedPayment) return;
     try {
-      await updatePaymentStatus(selectedPayment.id, status);
-      setPaymentList((prev) =>
-        prev.map((payment) =>
-          payment.id === selectedPayment.id ? { ...payment, status } : payment
-        )
-      );
+      await dispatch(updatePaymentStatus({ id: selectedPayment.id, status })).unwrap();
       handleClosePaymentDialog();
     } catch (error) {
       console.error('Failed to update payment status:', error);
@@ -409,20 +403,23 @@ const AdminDashboard = () => {
                 <LoadingSpinner message="Loading payments..." />
               ) : (
                 <Grid container spacing={2}>
-                  {paymentList.map((payment) => (
-                    <Grid item xs={12} sm={6} md={4} key={payment.id}>
+                  {payments.map((payment) => (
+                    <Grid item xs={12} sm={6} md={4} key={payment.payment_id}>
                       <Paper elevation={1} sx={{ p: 2 }}>
-                        <Typography variant="subtitle1">Payment ID: {payment.id}</Typography>
+                        <Typography variant="subtitle1">Payment ID: {payment.payment_id}</Typography>
                         <Typography variant="body2">Amount: Rs. {payment.amount}</Typography>
-                        <Typography variant="body2">Status: {payment.status}</Typography>
-                        <Button
+                        <Typography variant="body2">Status: {payment.status_name}</Typography>
+                        <Typography variant="body2">Status: {payment.method_name}</Typography>
+                        <Typography variant="body2">Payment By: {payment.username}</Typography>
+                        <Typography variant="body2">Payment Date: {payment.payment_date}</Typography>
+                        {/* <Button
                           variant="contained"
                           size="small"
                           color="primary"
                           onClick={() => handleOpenPaymentDialog(payment)}
                         >
                           Update Status
-                        </Button>
+                        </Button> */}
                       </Paper>
                     </Grid>
                   ))}
