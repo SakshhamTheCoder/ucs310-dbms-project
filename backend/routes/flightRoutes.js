@@ -10,6 +10,8 @@ import {
   listAirlines,
   addAirline,
   getBookingsByUsername,
+  addRoute,
+  deleteRoute,
 } from '../controllers/flightController.js';
 import {
   authenticateToken,
@@ -27,6 +29,9 @@ router.get('/airlines', listAirlines);
 router.post('/flights/add', authenticateToken, verifyAdmin, addFlight);
 router.post('/airports/add', authenticateToken, verifyAdmin, addAirport);
 router.post('/airlines/add', authenticateToken, verifyAdmin, addAirline);
+router.post('/routes/add', addRoute);
+router.delete('/routes/delete/:routeId', deleteRoute);
+
 
 // — Authenticated Users —
 router.post('/bookings', authenticateToken, bookFlight);

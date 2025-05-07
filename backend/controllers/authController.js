@@ -32,12 +32,19 @@ export const register = async (req, res) => {
 
     // Default role is 'user', not admin
     const role = 'user';
+    const role_id = await sqlQuery(
+      'SELECT role_id FROM roles WHERE role_name = ?',
+      [role]
+    )[0].role_id;
+    if (!role_id) {
+      return res.status(500).json({ message: 'Role not found' });
+    }
 
     // 4) Hash & insert
     const hashed = await bcrypt.hash(password, 10);
     const insertSql = `
       INSERT INTO users
-        (username, email, password, phone_number, passport_number, role)
+        (username, email, password, phone_number, passport_number, role_id)
       VALUES (?, ?, ?, ?, ?, ?)
     `;
     const result = await sqlQuery(insertSql, [
@@ -46,7 +53,7 @@ export const register = async (req, res) => {
       hashed,
       phone || null,
       passport || null,
-      role
+      role_id
     ]);
 
     // 5) Sign and return token
@@ -55,7 +62,6 @@ export const register = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '1y' }
     );
-
     return res.status(201).json({
       token,
       user: { id: result.insertId, username, email, role }
@@ -80,7 +86,7 @@ export const login = async (req, res) => {
 
   try {
     const users = await sqlQuery(
-      'SELECT * FROM users WHERE email = ? OR username = ?',
+      'SELECT *, role_name FROM users LEFT JOIN roles ON users.role_id = roles.role_id WHERE email = ? OR username = ?',
       [loginId, loginId]
     );
     if (!users.length) {
@@ -97,11 +103,8 @@ export const login = async (req, res) => {
       });
     }
 
-    // Check if user has a role, default to 'user' if not
-    const role = user.role || 'user';
-
     const token = jwt.sign(
-      { id: user.user_id, username: user.username, role },
+      { id: user.user_id, username: user.username, role_id },
       process.env.JWT_SECRET,
       { expiresIn: '1y' }
     );
@@ -112,7 +115,7 @@ export const login = async (req, res) => {
         id: user.user_id,
         username: user.username,
         email: user.email,
-        role
+        role: user.role_name
       }
     });
   } catch (err) {
@@ -132,7 +135,7 @@ export const me = async (req, res) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const rows = await sqlQuery(
-      'SELECT user_id, username, email, phone_number, role FROM users WHERE user_id = ?',
+      'SELECT user_id, username, email, phone_number, role_name FROM users LEFT JOIN roles ON users.role_id = roles.role_id WHERE user_id = ?',
       [decoded.id]
     );
     if (!rows.length) {
@@ -145,7 +148,7 @@ export const me = async (req, res) => {
         username: u.username,
         email: u.email,
         phone: u.phone_number,
-        role: u.role || 'user'
+        role: u.role_name
       }
     });
   } catch (err) {

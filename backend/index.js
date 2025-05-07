@@ -6,14 +6,10 @@ import initDb from './utils/initDb.js';
 
 import authRoutes from './routes/authRoutes.js';
 import flightRoutes from './routes/flightRoutes.js';
-import passengersRoutes from './routes/passengersRoutes.js';
 import servicesRoutes from './routes/servicesRoutes.js';
-import seatsRoutes from './routes/seatsRoutes.js';
 import paymentsRoutes from './routes/paymentsRoutes.js';
 import notificationsRoutes from './routes/notificationsRoutes.js';
 import usersRoutes from './routes/usersRoutes.js';
-
-import crewRoutes from './routes/crewRoutes.js';
 import gateRoutes from './routes/gateRoutes.js';
 import loungeRoutes from './routes/loungeRoutes.js';
 import reviewsRoutes from './routes/reviewsRoutes.js';
@@ -29,14 +25,11 @@ initDb().then(() => {
 
   app.use('/api/auth', authRoutes);
   app.use('/api', flightRoutes);
-  app.use('/api', passengersRoutes);
   app.use('/api', servicesRoutes);
-  app.use('/api', seatsRoutes);
   app.use('/api', paymentsRoutes);
   app.use('/api', notificationsRoutes);
   app.use('/api', usersRoutes);
 
-  app.use('/api', crewRoutes);
   app.use('/api', gateRoutes);
   app.use('/api', loungeRoutes);
   app.use('/api', reviewsRoutes);

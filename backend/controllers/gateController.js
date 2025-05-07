@@ -6,7 +6,7 @@ import sqlQuery from '../utils/db.js';
     await sqlQuery(`
       ALTER TABLE gates 
       MODIFY COLUMN status 
-      ENUM('Open','Occupied','Closed','Maintenance') 
+      ENUM('Open','Closed','Maintenance') 
       DEFAULT 'Open'
     `);
     console.log('Gate status enum updated');
@@ -27,14 +27,14 @@ export const listGates = async (_req, res) => {
 };
 
 export const addGate = async (req, res) => {
-  const { terminal, gate_number } = req.body;
-  if (!terminal || !gate_number) {
-    return res.status(400).json({ message: 'terminal and gate_number required' });
+  const { gate_number } = req.body;
+  if (!gate_number) {
+    return res.status(400).json({ message: 'gate_number is required' });
   }
   try {
     const result = await sqlQuery(
-      'INSERT INTO gates (terminal, gate_number) VALUES (?, ?)',
-      [terminal, gate_number]
+      'INSERT INTO gates (gate_number) VALUES (?)',
+      [gate_number]
     );
     res.status(201).json({ message: 'Gate added', gate_id: result.insertId });
   } catch (err) {
@@ -47,7 +47,7 @@ export const addGate = async (req, res) => {
 export const updateGate = async (req, res) => {
   const id = Number(req.params.id);
   const { status } = req.body;
-  const allowedStatus = ['Open', 'Occupied', 'Closed', 'Maintenance'];
+  const allowedStatus = ['Open', 'Closed', 'Maintenance'];
 
   if (!status) {
     return res.status(400).json({ message: 'status is required' });
@@ -82,7 +82,7 @@ export const deleteGate = async (req, res) => {
 // Update the assignGate function
 export const assignGate = async (req, res) => {
   const flightId = Number(req.params.fid);
-  const { gate_id } = req.body;
+  const { gate_number } = req.body;
 
   try {
     // Verify flight exists
@@ -90,35 +90,19 @@ export const assignGate = async (req, res) => {
     if (!flight) return res.status(404).json({ message: 'Flight not found' });
 
     // Check gate availability
-    const [gate] = await sqlQuery('SELECT * FROM gates WHERE gate_id = ?', [gate_id]);
+    const [gate] = await sqlQuery('SELECT * FROM gates WHERE gate_number = ?', [gate_number]);
     if (!gate) return res.status(404).json({ message: 'Gate not found' });
     if (gate.status !== 'Open') return res.status(400).json({ message: 'Gate not available' });
 
-    // Check if flight already has a gate assigned
-    const [existingAssignment] = await sqlQuery(
-      'SELECT id, gate_id FROM gate_assignments WHERE flight_id = ?', 
-      [flightId]
-    );
-
     // Start transaction
     await sqlQuery('START TRANSACTION');
-    
-    if (existingAssignment) {
-      // If flight already has a gate, free up the old gate first
-      await sqlQuery('UPDATE gates SET status = "Open" WHERE gate_id = ?', [existingAssignment.gate_id]);
-      await sqlQuery('DELETE FROM gate_assignments WHERE id = ?', [existingAssignment.id]);
-    }
-    
-    // Update new gate status and create assignment
-    await sqlQuery('UPDATE gates SET status = "Occupied" WHERE gate_id = ?', [gate_id]);
-    
-    const result = await sqlQuery(
-      'INSERT INTO gate_assignments (flight_id, gate_id) VALUES (?, ?)',
-      [flightId, gate_id]
-    );
+
+    // Update gate status and assign to flight
+    await sqlQuery('UPDATE gates SET status = "Closed" WHERE gate_number = ?', [gate_number]);
+    await sqlQuery('UPDATE flights SET gate_number = ? WHERE flight_id = ?', [gate_number, flightId]);
 
     await sqlQuery('COMMIT');
-    res.status(201).json({ message: 'Gate assigned', id: result.insertId });
+    res.status(201).json({ message: 'Gate assigned' });
   } catch (err) {
     await sqlQuery('ROLLBACK');
     console.error('Assign Gate Error:', err);
@@ -148,11 +132,25 @@ export const viewFlightGate = async (req, res) => {
 };
 
 export const unassignGate = async (req, res) => {
-  const id = Number(req.params.id);
+  const flightId = Number(req.params.fid);
   try {
-    await sqlQuery('DELETE FROM gate_assignments WHERE id = ?', [id]);
+    // Get the current gate assigned to the flight
+    const [flight] = await sqlQuery('SELECT gate_number FROM flights WHERE flight_id = ?', [flightId]);
+    if (!flight || !flight.gate_number) {
+      return res.status(404).json({ message: 'No gate assigned to this flight' });
+    }
+
+    // Start transaction
+    await sqlQuery('START TRANSACTION');
+
+    // Free up the gate and remove assignment from flight
+    await sqlQuery('UPDATE gates SET status = "Open" WHERE gate_number = ?', [flight.gate_number]);
+    await sqlQuery('UPDATE flights SET gate_number = NULL WHERE flight_id = ?', [flightId]);
+
+    await sqlQuery('COMMIT');
     res.json({ message: 'Gate unassigned' });
   } catch (err) {
+    await sqlQuery('ROLLBACK');
     console.error('Unassign Gate Error:', err);
     res.status(500).json({ message: 'Server error unassigning gate' });
   }
