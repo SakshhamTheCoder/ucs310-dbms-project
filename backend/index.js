@@ -12,7 +12,6 @@ import notificationsRoutes from './routes/notificationsRoutes.js';
 import usersRoutes from './routes/usersRoutes.js';
 import gateRoutes from './routes/gateRoutes.js';
 import loungeRoutes from './routes/loungeRoutes.js';
-import reviewsRoutes from './routes/reviewsRoutes.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -32,7 +31,6 @@ initDb().then(() => {
 
   app.use('/api', gateRoutes);
   app.use('/api', loungeRoutes);
-  app.use('/api', reviewsRoutes);
 
   app.listen(port, () => {
     console.log(`Server started at http://localhost:${port}`);
