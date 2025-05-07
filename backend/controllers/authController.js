@@ -32,13 +32,16 @@ export const register = async (req, res) => {
 
     // Default role is 'user', not admin
     const role = 'user';
-    const role_id = await sqlQuery(
+    const roleResult = await sqlQuery(
       'SELECT role_id FROM roles WHERE role_name = ?',
       [role]
-    )[0].role_id;
-    if (!role_id) {
+    );
+    
+    if (!roleResult || !roleResult.length) {
       return res.status(500).json({ message: 'Role not found' });
     }
+    
+    const role_id = roleResult[0].role_id;
 
     // 4) Hash & insert
     const hashed = await bcrypt.hash(password, 10);
