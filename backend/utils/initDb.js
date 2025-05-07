@@ -73,7 +73,7 @@ const initDb = async () => {
     await sqlQuery(`
       CREATE TABLE IF NOT EXISTS gates (
         gate_id      INT AUTO_INCREMENT PRIMARY KEY,
-        gate_number  VARCHAR(10) NOT NULL,
+        gate_number  VARCHAR(10),
         status       ENUM('Open','Closed','Maintenance') DEFAULT 'Open',
         UNIQUE(gate_number)
       )
@@ -158,6 +158,11 @@ const initDb = async () => {
         status_name ENUM('Pending', 'Completed', 'Failed', 'Refunded') NOT NULL
       )
     `);
+    await sqlQuery(`
+      INSERT INTO payment_statuses (status_name)
+      VALUES ('Pending'), ('Completed'), ('Failed'), ('Refunded')
+      ON DUPLICATE KEY UPDATE status_name = status_name
+    `);
     console.log('Payment Statuses table OK');
 
     await sqlQuery(`
@@ -165,6 +170,11 @@ const initDb = async () => {
         method_id INT AUTO_INCREMENT PRIMARY KEY,
         method_name ENUM('Card', 'UPI', 'Netbanking', 'Wallet') NOT NULL
       )
+    `);
+    await sqlQuery(`
+      INSERT INTO payment_methods (method_name)
+      VALUES ('Card'), ('UPI'), ('Netbanking'), ('Wallet')
+      ON DUPLICATE KEY UPDATE method_name = method_name
     `);
     console.log('Payment Methods table OK');
 

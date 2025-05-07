@@ -12,7 +12,7 @@ const router = express.Router();
 router.get('/lounges', listLounges);
 
 // Admin
-router.post('/lounges', authenticateToken, verifyAdmin, addLounge);
+router.post('/lounges/add', authenticateToken, verifyAdmin, addLounge);
 router.delete('/lounges/:id', authenticateToken, verifyAdmin, deleteLounge);
 
 export default router;

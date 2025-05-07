@@ -19,11 +19,14 @@ import BookingDetails from './pages/BookingDetails';
 import Services from './pages/Services';
 import AdminDashboard from './pages/AdminDashboard';
 import NotFound from './pages/NotFound';
+import Profile from './pages/Profile';
+import MyPayments from './pages/MyPayments';
+import Notifications from './pages/Notifications';
 
 function App() {
   const dispatch = useDispatch();
   const { token, user } = useSelector(state => state.auth);
-  
+
   useEffect(() => {
     if (token) {
       dispatch(getUserProfile());
@@ -39,19 +42,22 @@ function App() {
         <Route path="register" element={token ? <Navigate to="/" /> : <Register />} />
         <Route path="flights" element={<Flights />} />
         <Route path="flights/:id" element={<FlightDetails />} />
-        
+
         {/* Protected routes (require authentication) */}
         <Route element={<ProtectedRoute />}>
           <Route path="bookings" element={<Bookings />} />
           <Route path="bookings/:id" element={<BookingDetails />} />
           <Route path="services" element={<Services />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="payments" element={<MyPayments />} />
+          <Route path="notifications" element={<Notifications />} />
         </Route>
-        
+
         {/* Admin routes */}
         <Route element={<AdminRoute />}>
           <Route path="admin/*" element={<AdminDashboard />} />
         </Route>
-        
+
         {/* 404 route */}
         <Route path="*" element={<NotFound />} />
       </Route>

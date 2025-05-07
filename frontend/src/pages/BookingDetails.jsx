@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserBookings, cancelBooking } from '../store/slices/flightSlice';
-import { 
-  fetchServices, 
-  fetchBookingServices, 
+import {
+  fetchServices,
+  fetchBookingServices,
   addServiceToBooking,
   removeServiceFromBooking,
   clearError as clearServicesError
@@ -77,49 +77,49 @@ const BookingDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  
+
   // Get the tab from the URL query param
   const query = new URLSearchParams(location.search);
   const initialTab = query.get('tab') === 'services' ? 1 : 0;
-  
+
   const { bookings, loading: bookingsLoading, error: bookingsError } = useSelector(state => state.flights);
-  const { 
-    services, 
-    bookingServices, 
-    loading: servicesLoading, 
-    error: servicesError 
+  const {
+    services,
+    bookingServices,
+    loading: servicesLoading,
+    error: servicesError
   } = useSelector(state => state.services);
-  
+
   const [tabValue, setTabValue] = useState(initialTab);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [addServiceDialogOpen, setAddServiceDialogOpen] = useState(false);
   const [selectedService, setSelectedService] = useState('');
   const [serviceQuantity, setServiceQuantity] = useState(1);
   const [alertState, setAlertState] = useState({ open: false, message: '', severity: 'success' });
-  
+
   const booking = bookings.find(b => b.booking_id === Number(id));
-  
+
   useEffect(() => {
     if (!bookings.length) {
       dispatch(fetchUserBookings());
     }
-    
+
     dispatch(fetchServices());
     dispatch(fetchBookingServices(Number(id)));
   }, [dispatch, id, bookings.length]);
-  
+
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
   };
-  
+
   const handleOpenCancelDialog = () => {
     setCancelDialogOpen(true);
   };
-  
+
   const handleCloseCancelDialog = () => {
     setCancelDialogOpen(false);
   };
-  
+
   const handleCancelBooking = () => {
     dispatch(cancelBooking(Number(id)))
       .unwrap()
@@ -135,17 +135,17 @@ const BookingDetails = () => {
         handleCloseCancelDialog();
       });
   };
-  
+
   const handleOpenAddServiceDialog = () => {
     setAddServiceDialogOpen(true);
   };
-  
+
   const handleCloseAddServiceDialog = () => {
     setAddServiceDialogOpen(false);
     setSelectedService('');
     setServiceQuantity(1);
   };
-  
+
   const handleAddService = () => {
     if (!selectedService) {
       setAlertState({
@@ -155,7 +155,7 @@ const BookingDetails = () => {
       });
       return;
     }
-    
+
     dispatch(addServiceToBooking({
       bookingId: Number(id),
       serviceId: Number(selectedService),
@@ -179,7 +179,7 @@ const BookingDetails = () => {
         });
       });
   };
-  
+
   const handleRemoveService = (bookingServiceId) => {
     dispatch(removeServiceFromBooking({
       bookingId: Number(id),
@@ -201,7 +201,7 @@ const BookingDetails = () => {
         });
       });
   };
-  
+
   const formatDateTime = (dateTimeStr) => {
     try {
       const date = new Date(dateTimeStr);
@@ -210,33 +210,25 @@ const BookingDetails = () => {
       return dateTimeStr;
     }
   };
-  
-  const calculateTotal = () => {
-    const flightPrice = booking?.total_price || 0;
-    const servicesTotal = bookingServices.reduce((total, service) => {
-      return total + (service.price * service.quantity);
-    }, 0);
-    
-    return flightPrice + servicesTotal;
-  };
-  
+
+
   const handleCloseAlert = () => {
     setAlertState({ ...alertState, open: false });
     dispatch(clearServicesError());
   };
-  
+
   if (bookingsLoading && !booking) {
     return <LoadingSpinner message="Loading booking details..." />;
   }
-  
+
   if (!booking) {
     return (
       <Container sx={{ py: 4 }}>
         <Alert severity="error">
           Booking not found. The booking may have been cancelled or the ID is invalid.
         </Alert>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           onClick={() => navigate('/bookings')}
           sx={{ mt: 2 }}
         >
@@ -245,21 +237,21 @@ const BookingDetails = () => {
       </Container>
     );
   }
-  
+
   return (
     <Container sx={{ py: 4 }}>
-      <Button 
-        variant="outlined" 
+      <Button
+        variant="outlined"
         onClick={() => navigate('/bookings')}
         sx={{ mb: 3 }}
       >
         Back to My Bookings
       </Button>
-      
+
       <Paper elevation={3} sx={{ mb: 4 }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs 
-            value={tabValue} 
+          <Tabs
+            value={tabValue}
             onChange={handleTabChange}
             variant="fullWidth"
           >
@@ -267,21 +259,21 @@ const BookingDetails = () => {
             <Tab label="Add-on Services" id="booking-tab-1" />
           </Tabs>
         </Box>
-        
+
         {/* Booking Details Tab */}
         <TabPanel value={tabValue} index={0}>
           <Box>
             <Typography variant="h5" gutterBottom>
               Booking #{booking.booking_id}
             </Typography>
-            <Chip 
-              label={`Booked on ${new Date(booking.booking_date).toLocaleDateString()}`} 
-              color="primary" 
+            <Chip
+              label={`Booked on ${new Date(booking.booking_date).toLocaleDateString()}`}
+              color="primary"
               variant="outlined"
               icon={<EventIcon />}
               sx={{ mb: 3 }}
             />
-            
+
             <Grid container spacing={4}>
               <Grid item xs={12} md={8}>
                 <Paper elevation={1} sx={{ p: 3, mb: 3 }}>
@@ -297,7 +289,7 @@ const BookingDetails = () => {
                         </Typography>
                       </Box>
                     </Grid>
-                    
+
                     <Grid item xs={12} sm={6}>
                       <Box>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -314,7 +306,7 @@ const BookingDetails = () => {
                         </Typography>
                       </Box>
                     </Grid>
-                    
+
                     <Grid item xs={12} sm={6}>
                       <Box>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -333,7 +325,7 @@ const BookingDetails = () => {
                     </Grid>
                   </Grid>
                 </Paper>
-                
+
                 <Paper elevation={1} sx={{ p: 3 }}>
                   <Typography variant="h6" gutterBottom>
                     Additional Information
@@ -346,48 +338,27 @@ const BookingDetails = () => {
                   </Typography>
                 </Paper>
               </Grid>
-              
+
               <Grid item xs={12} md={4}>
                 <Paper elevation={1} sx={{ p: 3, bgcolor: '#f8f9fa' }}>
                   <Typography variant="h6" gutterBottom>
                     Price Summary
                   </Typography>
                   <Box sx={{ mb: 2 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography variant="body2">Flight Fare</Typography>
-                      <Typography variant="body2">${booking.total_price}</Typography>
-                    </Box>
-                    
-                    {bookingServices.length > 0 && (
-                      <>
-                        <Divider sx={{ my: 1 }} />
-                        {bookingServices.map(service => (
-                          <Box 
-                            key={service.booking_service_id} 
-                            sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}
-                          >
-                            <Typography variant="body2">
-                              {service.name} (x{service.quantity})
-                            </Typography>
-                            <Typography variant="body2">
-                              ${service.price * service.quantity}
-                            </Typography>
-                          </Box>
-                        ))}
-                      </>
-                    )}
-                    
+
+
+
                     <Divider sx={{ my: 1 }} />
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                       <Typography variant="body1" fontWeight="bold">Total</Typography>
                       <Typography variant="body1" fontWeight="bold" color="primary">
-                        ${calculateTotal()}
+                        Rs. {booking.total_price}
                       </Typography>
                     </Box>
                   </Box>
-                  
-                  <Button 
-                    variant="outlined" 
+
+                  <Button
+                    variant="outlined"
                     color="error"
                     fullWidth
                     onClick={handleOpenCancelDialog}
@@ -401,7 +372,7 @@ const BookingDetails = () => {
             </Grid>
           </Box>
         </TabPanel>
-        
+
         {/* Services Tab */}
         <TabPanel value={tabValue} index={1}>
           <Grid container spacing={3}>
@@ -410,8 +381,8 @@ const BookingDetails = () => {
                 <Typography variant="h5">
                   Add-on Services
                 </Typography>
-                <Button 
-                  variant="contained" 
+                <Button
+                  variant="contained"
                   color="primary"
                   startIcon={<AddIcon />}
                   onClick={handleOpenAddServiceDialog}
@@ -419,7 +390,7 @@ const BookingDetails = () => {
                   Add Service
                 </Button>
               </Box>
-              
+
               {servicesLoading ? (
                 <LoadingSpinner message="Loading services..." />
               ) : bookingServices.length > 0 ? (
@@ -428,8 +399,8 @@ const BookingDetails = () => {
                     <Paper key={service.booking_service_id} elevation={1} sx={{ mb: 2 }}>
                       <ListItem
                         secondaryAction={
-                          <IconButton 
-                            edge="end" 
+                          <IconButton
+                            edge="end"
                             aria-label="delete"
                             onClick={() => handleRemoveService(service.booking_service_id)}
                           >
@@ -442,7 +413,7 @@ const BookingDetails = () => {
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                               <Typography variant="subtitle1">{service.name}</Typography>
                               <Typography variant="subtitle1" color="primary">
-                                ${service.price * service.quantity}
+                                Rs. {service.price}
                               </Typography>
                             </Box>
                           }
@@ -451,12 +422,7 @@ const BookingDetails = () => {
                               <Typography variant="body2" color="textSecondary">
                                 {service.description || 'No description available'}
                               </Typography>
-                              <Chip 
-                                label={`Quantity: ${service.quantity}`} 
-                                size="small" 
-                                variant="outlined"
-                                sx={{ mt: 1 }}
-                              />
+
                             </>
                           }
                         />
@@ -476,7 +442,7 @@ const BookingDetails = () => {
                 </Paper>
               )}
             </Grid>
-            
+
             <Grid item xs={12} md={4}>
               <Paper elevation={1} sx={{ p: 3 }}>
                 <Typography variant="h6" gutterBottom>
@@ -491,9 +457,9 @@ const BookingDetails = () => {
                         <Typography variant="subtitle2">{service.name}</Typography>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <Typography variant="body2" color="textSecondary">
-                            ${service.price} each
+                            Rs. {service.price} each
                           </Typography>
-                          <Chip 
+                          <Chip
                             label={`${service.available_quantity} available`}
                             size="small"
                             color={service.available_quantity > 10 ? 'success' : 'warning'}
@@ -510,7 +476,7 @@ const BookingDetails = () => {
           </Grid>
         </TabPanel>
       </Paper>
-      
+
       {/* Cancel Booking Dialog */}
       <Dialog
         open={cancelDialogOpen}
@@ -529,7 +495,7 @@ const BookingDetails = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      
+
       {/* Add Service Dialog */}
       <Dialog
         open={addServiceDialogOpen}
@@ -550,17 +516,17 @@ const BookingDetails = () => {
                   <em>Select a service</em>
                 </MenuItem>
                 {services.map(service => (
-                  <MenuItem 
-                    key={service.service_id} 
+                  <MenuItem
+                    key={service.service_id}
                     value={service.service_id}
                     disabled={service.available_quantity <= 0}
                   >
-                    {service.name} - ${service.price} ({service.available_quantity} available)
+                    {service.name} - Rs. {service.price} ({service.available_quantity} available)
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
-            
+
             <TextField
               fullWidth
               label="Quantity"
@@ -579,7 +545,7 @@ const BookingDetails = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      
+
       {/* Alert Message */}
       <AlertMessage
         open={alertState.open || !!bookingsError || !!servicesError}

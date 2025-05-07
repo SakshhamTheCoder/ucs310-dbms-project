@@ -111,10 +111,10 @@ const Flights = () => {
       </Typography>
 
       {/* Filters Section */}
-      <Paper 
-        elevation={3} 
-        sx={{ 
-          p: 3, 
+      <Paper
+        elevation={3}
+        sx={{
+          p: 3,
           mb: 4,
           bgcolor: '#f9f9f9'
         }}
@@ -122,7 +122,7 @@ const Flights = () => {
         <Typography variant="h6" gutterBottom>
           Filter Flights
         </Typography>
-        
+
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
@@ -140,7 +140,7 @@ const Flights = () => {
               }}
             />
           </Grid>
-          
+
           <Grid item xs={12} md={3}>
             <FormControl fullWidth>
               <InputLabel>Departure Airport</InputLabel>
@@ -157,7 +157,7 @@ const Flights = () => {
               </Select>
             </FormControl>
           </Grid>
-          
+
           <Grid item xs={12} md={3}>
             <FormControl fullWidth>
               <InputLabel>Arrival Airport</InputLabel>
@@ -174,7 +174,7 @@ const Flights = () => {
               </Select>
             </FormControl>
           </Grid>
-          
+
           <Grid item xs={12} md={3}>
             <FormControl fullWidth>
               <InputLabel>Airline</InputLabel>
@@ -191,7 +191,7 @@ const Flights = () => {
               </Select>
             </FormControl>
           </Grid>
-          
+
           <Grid item xs={12} md={3}>
             <Grid container spacing={1}>
               <Grid item xs={6}>
@@ -216,10 +216,10 @@ const Flights = () => {
               </Grid>
             </Grid>
           </Grid>
-          
+
           <Grid item xs={12}>
-            <Button 
-              variant="outlined" 
+            <Button
+              variant="outlined"
               onClick={() => setFilters({
                 departureAirport: '',
                 arrivalAirport: '',
@@ -252,15 +252,15 @@ const Flights = () => {
                         <Typography variant="caption" color="textSecondary">
                           Flight #{flight.flight_id}
                         </Typography>
-                        <Chip 
-                          icon={<AirlineSeatReclineNormalIcon />} 
-                          label={`Gate ${flight.gate_number || 'TBA'}`} 
+                        <Chip
+                          icon={<AirlineSeatReclineNormalIcon />}
+                          label={`Gate ${flight.gate_number || 'TBA'}`}
                           size="small"
                           sx={{ mt: 1 }}
                         />
                       </Box>
                     </Grid>
-                    
+
                     <Grid item xs={12} md={8}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                         <Box>
@@ -274,9 +274,9 @@ const Flights = () => {
                             {formatDateTime(flight.departure_time)}
                           </Typography>
                         </Box>
-                        
+
                         <FlightIcon sx={{ transform: 'rotate(90deg)', mx: 2 }} />
-                        
+
                         <Box>
                           <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <LocationOnIcon color="action" sx={{ mr: 1 }} />
@@ -289,26 +289,26 @@ const Flights = () => {
                           </Typography>
                         </Box>
                       </Box>
-                      
+
                       <Divider sx={{ my: 1 }} />
-                      
+
                       <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
                         <EventIcon color="action" sx={{ mr: 1 }} />
                         <Typography variant="body2">
-                          {new Date(flight.arrival_time).getTime() - new Date(flight.departure_time).getTime() > 0 
+                          {new Date(flight.arrival_time).getTime() - new Date(flight.departure_time).getTime() > 0
                             ? `Flight Duration: ${Math.round((new Date(flight.arrival_time).getTime() - new Date(flight.departure_time).getTime()) / (1000 * 60))} minutes`
                             : 'Duration: TBA'
                           }
                         </Typography>
                       </Box>
                     </Grid>
-                    
+
                     <Grid item xs={12} md={2} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                       <Typography variant="h5" color="primary" gutterBottom>
-                        ${flight.price}
+                        Rs. {flight.price}
                       </Typography>
-                      <Button 
-                        variant="contained" 
+                      <Button
+                        variant="contained"
                         color="primary"
                         onClick={() => handleFlightSelect(flight)}
                         fullWidth

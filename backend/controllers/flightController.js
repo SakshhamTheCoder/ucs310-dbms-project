@@ -134,6 +134,10 @@ export const addFlight = async (req, res) => {
     }
 
     try {
+        await sqlQuery(
+            'INSERT INTO gates (gate_number) VALUES (?) ON DUPLICATE KEY UPDATE gate_number = gate_number',
+            [gateNumber]
+        );
         const result = await sqlQuery(
             `
             INSERT INTO flights (route_id, departure_time, arrival_time, gate_number, airline_id, price)
@@ -201,27 +205,52 @@ export const getBookingsByUsername = async (req, res) => {
 
 // Add a new route
 export const addRoute = async (req, res) => {
-    const { departureStation, arrivalStation } = req.body;
+    const { departureStationName, arrivalStationName } = req.body;
 
-    if (!departureStation || !arrivalStation) {
-        return res.status(400).json({ message: 'Both departure and arrival stations are required' });
+    if (!departureStationName || !arrivalStationName) {
+        return res.status(400).json({ message: 'Both departure and arrival station names are required' });
     }
 
     try {
+        // Find the station IDs based on the names
+        const departureStation = await sqlQuery(
+            'SELECT airport_id FROM airports WHERE LOWER(airport_name) = LOWER(?)',
+            [departureStationName]
+        );
+
+        const arrivalStation = await sqlQuery(
+            'SELECT airport_id FROM airports WHERE LOWER(airport_name) = LOWER(?)',
+            [arrivalStationName]
+        );
+
+        if (!departureStation.length) {
+            return res.status(404).json({ message: `Departure station '${departureStationName}' not found` });
+        }
+
+        if (!arrivalStation.length) {
+            return res.status(404).json({ message: `Arrival station '${arrivalStationName}' not found` });
+        }
+
+        const departureStationId = departureStation[0].airport_id;
+        const arrivalStationId = arrivalStation[0].airport_id;
+
+        if (departureStationId === arrivalStationId) {
+            return res.status(400).json({ message: 'Departure and arrival stations cannot be the same' });
+        }
+
         const result = await sqlQuery(
             `INSERT INTO flight_routes (departure_station, arrival_station)
              VALUES (?, ?)
              ON DUPLICATE KEY UPDATE route_id = route_id`,
-            [departureStation, arrivalStation]
+            [departureStationId, arrivalStationId]
         );
 
         res.status(201).json({ message: 'Route added successfully', route_id: result.insertId });
     } catch (err) {
-        console.error(err);
+        console.error('Error adding route:', err);
         res.status(500).json({ message: 'Server error' });
     }
 };
-
 // Delete a route
 export const deleteRoute = async (req, res) => {
     const { routeId } = req.params;
@@ -233,6 +262,22 @@ export const deleteRoute = async (req, res) => {
     try {
         await sqlQuery('DELETE FROM flight_routes WHERE route_id = ?', [routeId]);
         res.json({ message: 'Route deleted successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// list all routes
+export const listRoutes = async (req, res) => {
+    try {
+        const routes = await sqlQuery(`
+            SELECT flight_routes.route_id, dep.airport_name AS departure_airport, arr.airport_name AS arrival_airport
+            FROM flight_routes
+            JOIN airports dep ON flight_routes.departure_station = dep.airport_id
+            JOIN airports arr ON flight_routes.arrival_station = arr.airport_id
+        `);
+        res.json(routes);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });

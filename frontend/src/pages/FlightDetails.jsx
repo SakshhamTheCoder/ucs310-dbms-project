@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  fetchFlights, 
-  bookFlight, 
-  clearError as clearFlightError 
+import {
+  fetchFlights,
+  bookFlight,
+  clearError as clearFlightError
 } from '../store/slices/flightSlice';
 import {
   Box,
@@ -33,26 +33,26 @@ const FlightDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const { flights, selectedFlight, loading, error } = useSelector(state => state.flights);
   const { token } = useSelector(state => state.auth);
-  
+
   const [bookingStatus, setBookingStatus] = useState({ success: false, error: null });
-  
+
   useEffect(() => {
     if (!flights.length) {
       dispatch(fetchFlights());
     }
   }, [dispatch, id, flights.length]);
-  
+
   const flight = selectedFlight || flights.find(f => f.flight_id === Number(id));
-  
+
   const handleBookFlight = () => {
     if (!token) {
       navigate('/login');
       return;
     }
-    
+
     dispatch(bookFlight(Number(id)))
       .unwrap()
       .then(() => {
@@ -62,7 +62,7 @@ const FlightDetails = () => {
         setBookingStatus({ success: false, error: err });
       });
   };
-  
+
   const formatDateTime = (dateTimeStr) => {
     try {
       const date = new Date(dateTimeStr);
@@ -71,24 +71,24 @@ const FlightDetails = () => {
       return dateTimeStr;
     }
   };
-  
+
   const handleCloseAlert = () => {
     setBookingStatus({ success: false, error: null });
     dispatch(clearFlightError());
   };
-  
+
   if (loading && !flight) {
     return <LoadingSpinner message="Loading flight details..." />;
   }
-  
+
   if (!flight) {
     return (
       <Container sx={{ py: 4 }}>
         <Alert severity="error">
           Flight not found. The flight may have been removed or the ID is invalid.
         </Alert>
-        <Button 
-          variant="contained" 
+        <Button
+          variant="contained"
           onClick={() => navigate('/flights')}
           sx={{ mt: 2 }}
         >
@@ -97,21 +97,21 @@ const FlightDetails = () => {
       </Container>
     );
   }
-  
+
   const flightDuration = new Date(flight.arrival_time) - new Date(flight.departure_time);
   const hours = Math.floor(flightDuration / (1000 * 60 * 60));
   const minutes = Math.floor((flightDuration % (1000 * 60 * 60)) / (1000 * 60));
 
   return (
     <Container sx={{ py: 4 }}>
-      <Button 
-        variant="outlined" 
+      <Button
+        variant="outlined"
         onClick={() => navigate(-1)}
         sx={{ mb: 3 }}
       >
         Back
       </Button>
-      
+
       {/* Flight Card */}
       <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
         <Grid container spacing={3}>
@@ -120,7 +120,7 @@ const FlightDetails = () => {
               <Typography variant="h4" component="h1" gutterBottom>
                 Flight #{flight.flight_id}
               </Typography>
-              <Chip 
+              <Chip
                 color="primary"
                 icon={<AirlineSeatReclineNormalIcon />}
                 label={`Gate ${flight.gate_number || 'TBA'}`}
@@ -131,7 +131,7 @@ const FlightDetails = () => {
               {flight.airline_name}
             </Typography>
           </Grid>
-          
+
           {/* Flight Route */}
           <Grid item xs={12}>
             <Card>
@@ -153,7 +153,7 @@ const FlightDetails = () => {
                       </Typography>
                     </Box>
                   </Grid>
-                  
+
                   <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                       <Divider orientation="horizontal" sx={{ width: '100%', mb: 1 }} />
@@ -163,7 +163,7 @@ const FlightDetails = () => {
                       </Typography>
                     </Box>
                   </Grid>
-                  
+
                   <Grid item xs={5}>
                     <Box>
                       <Typography variant="subtitle2" color="textSecondary">
@@ -184,7 +184,7 @@ const FlightDetails = () => {
               </CardContent>
             </Card>
           </Grid>
-          
+
           {/* Flight Details */}
           <Grid item xs={12} md={6}>
             <Typography variant="h6" gutterBottom>
@@ -209,7 +209,7 @@ const FlightDetails = () => {
               </Typography>
             </Box>
           </Grid>
-          
+
           {/* Pricing & Booking */}
           <Grid item xs={12} md={6}>
             <Paper elevation={2} sx={{ p: 3, bgcolor: '#f8f9fa' }}>
@@ -227,7 +227,7 @@ const FlightDetails = () => {
               <Divider sx={{ my: 2 }} />
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                 <Typography variant="h6">Total</Typography>
-                <Typography variant="h6" color="primary">${flight.price}</Typography>
+                <Typography variant="h6" color="primary">Rs. {flight.price}</Typography>
               </Box>
               <Button
                 variant="contained"
@@ -248,7 +248,7 @@ const FlightDetails = () => {
           </Grid>
         </Grid>
       </Paper>
-      
+
       {/* Alerts */}
       <AlertMessage
         open={!!error || !!bookingStatus.error}
@@ -256,7 +256,7 @@ const FlightDetails = () => {
         severity="error"
         onClose={handleCloseAlert}
       />
-      
+
       <AlertMessage
         open={bookingStatus.success}
         message="Flight booked successfully! Go to My Bookings to view details."

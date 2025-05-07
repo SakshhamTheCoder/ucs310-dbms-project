@@ -13,6 +13,8 @@ import {
 
 const router = express.Router();
 
+// Notifications Routes
+
 // Admin: create & view all & delete
 router.post(
   '/notifications',

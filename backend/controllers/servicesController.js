@@ -11,10 +11,17 @@ export const createService = async (req, res) => {
 
   try {
     const result = await sqlQuery(
-      `INSERT INTO services (name, description, price, available_quantity)
-       VALUES (?, ?, ?, ?)`,
-      [name, description || null, price, available_quantity]
+      `INSERT INTO services (name, description)
+       VALUES (?, ?)`,
+      [name, description || null]
     );
+
+    await sqlQuery(
+      `INSERT INTO service_inventory (service_id, price, available_quantity)
+       VALUES (?, ?, ?)`,
+      [result.insertId, price, available_quantity]
+    );
+
     res.status(201).json({
       message: 'Service created successfully',
       service_id: result.insertId
@@ -29,8 +36,10 @@ export const createService = async (req, res) => {
 export const listServices = async (_req, res) => {
   try {
     const rows = await sqlQuery(
-      `SELECT s.service_id, s.name, s.description, s.price, s.available_quantity
-         FROM services s`
+      `SELECT s.service_id, s.name, s.description, 
+              si.price, si.available_quantity
+         FROM services s
+         JOIN service_inventory si ON s.service_id = si.service_id`
     );
     res.json(rows);
   } catch (err) {
@@ -56,15 +65,26 @@ export const updateService = async (req, res) => {
   }
 
   try {
-    await sqlQuery(
-      `UPDATE services
-          SET name = COALESCE(?, name),
-              description = COALESCE(?, description),
-              price = COALESCE(?, price),
-              available_quantity = COALESCE(?, available_quantity)
-        WHERE service_id = ?`,
-      [name, description, price, available_quantity, id]
-    );
+    if (name !== undefined || description !== undefined) {
+      await sqlQuery(
+        `UPDATE services
+            SET name = COALESCE(?, name),
+                description = COALESCE(?, description)
+          WHERE service_id = ?`,
+        [name, description, id]
+      );
+    }
+
+    if (price !== undefined || available_quantity !== undefined) {
+      await sqlQuery(
+        `UPDATE service_inventory
+            SET price = COALESCE(?, price),
+                available_quantity = COALESCE(?, available_quantity)
+          WHERE service_id = ?`,
+        [price, available_quantity, id]
+      );
+    }
+
     return res.json({ message: 'Service updated successfully' });
   } catch (err) {
     console.error('Update Service Error:', err);
@@ -106,7 +126,7 @@ export const addServiceToBooking = async (req, res) => {
     }
 
     const srv = await sqlQuery(
-      'SELECT available_quantity FROM services WHERE service_id = ?',
+      'SELECT available_quantity FROM service_inventory WHERE service_id = ?',
       [serviceId]
     );
     if (!srv.length) {
@@ -119,13 +139,14 @@ export const addServiceToBooking = async (req, res) => {
     }
 
     const r = await sqlQuery(
-      `INSERT INTO booking_services (booking_id, service_id, quantity)
-       VALUES (?, ?, ?)`,
-      [bookingId, serviceId, quantity]
+      `UPDATE bookings 
+          SET total_price = total_price + (SELECT price FROM service_inventory WHERE service_id = ?) * ?, service_id = ?
+        WHERE booking_id = ?`,
+      [serviceId, quantity, serviceId, bookingId]
     );
 
     await sqlQuery(
-      `UPDATE services
+      `UPDATE service_inventory
           SET available_quantity = available_quantity - ?
         WHERE service_id = ?`,
       [quantity, serviceId]
@@ -145,6 +166,7 @@ export const addServiceToBooking = async (req, res) => {
 export const listBookingServices = async (req, res) => {
   const bookingId = Number(req.params.bid);
   const userId = req.user.id;
+
   try {
     const bk = await sqlQuery(
       'SELECT user_id FROM bookings WHERE booking_id = ?',
@@ -153,14 +175,17 @@ export const listBookingServices = async (req, res) => {
     if (!bk.length || bk[0].user_id !== userId) {
       return res.status(403).json({ message: 'Not your booking' });
     }
+
     const rows = await sqlQuery(
-      `SELECT bs.id AS booking_service_id, bs.quantity,
-              s.service_id, s.name, s.description, s.price
-         FROM booking_services bs
-         JOIN services s ON bs.service_id = s.service_id
-        WHERE bs.booking_id = ?`,
+      `SELECT s.service_id, s.name, s.description, 
+              si.price, b.total_price, si.available_quantity
+         FROM bookings b
+         JOIN services s ON b.service_id = s.service_id
+         JOIN service_inventory si ON s.service_id = si.service_id
+        WHERE b.booking_id = ?`,
       [bookingId]
     );
+
     res.json(rows);
   } catch (err) {
     console.error('List Booking Services Error:', err);
@@ -170,24 +195,45 @@ export const listBookingServices = async (req, res) => {
 
 // User: remove service from booking and restore stock
 export const removeServiceFromBooking = async (req, res) => {
-  const id = Number(req.params.id);
+  const bookingId = Number(req.params.bid);
+  const userId = req.user.id;
+
   try {
-    const row = await sqlQuery(
-      `SELECT bs.quantity, bs.service_id
-         FROM booking_services bs
-        WHERE bs.id = ?`,
-      [id]
+    const bk = await sqlQuery(
+      'SELECT user_id, service_id, total_price FROM bookings WHERE booking_id = ?',
+      [bookingId]
     );
-    if (row.length) {
-      await sqlQuery(
-        `UPDATE services
-            SET available_quantity = available_quantity + ?
-          WHERE service_id = ?`,
-        [row[0].quantity, row[0].service_id]
-      );
+    if (!bk.length || bk[0].user_id !== userId) {
+      return res.status(403).json({ message: 'Not your booking' });
     }
 
-    await sqlQuery('DELETE FROM booking_services WHERE id = ?', [id]);
+    const serviceId = bk[0].service_id;
+    const totalPrice = bk[0].total_price;
+
+    const srv = await sqlQuery(
+      'SELECT price, available_quantity FROM service_inventory WHERE service_id = ?',
+      [serviceId]
+    );
+    if (!srv.length) {
+      return res.status(404).json({ message: 'Service not found' });
+    }
+
+    const updatedPrice = totalPrice - srv[0].price;
+
+    await sqlQuery(
+      `UPDATE bookings 
+          SET total_price = ?, service_id = NULL
+        WHERE booking_id = ?`,
+      [updatedPrice, bookingId]
+    );
+
+    await sqlQuery(
+      `UPDATE service_inventory
+          SET available_quantity = available_quantity + 1
+        WHERE service_id = ?`,
+      [serviceId]
+    );
+
     res.json({ message: 'Service removed from booking' });
   } catch (err) {
     console.error('Remove Service Error:', err);
@@ -199,15 +245,17 @@ export const removeServiceFromBooking = async (req, res) => {
 export const listAllServiceOrders = async (_req, res) => {
   try {
     const rows = await sqlQuery(`
-      SELECT bs.id, bs.booking_id, bs.quantity, bs.added_at,
-             s.name AS service_name, s.price,
+      SELECT b.booking_id, b.total_price, b.service_id, b.booking_date,
+             s.name AS service_name, si.price,
              u.username 
-        FROM booking_services bs
-        JOIN services s ON bs.service_id = s.service_id
-        JOIN bookings b ON bs.booking_id = b.booking_id
+        FROM bookings b
+        JOIN services s ON b.service_id = s.service_id
+        JOIN service_inventory si ON s.service_id = si.service_id
         JOIN users u ON b.user_id = u.user_id
-       ORDER BY bs.added_at DESC
+       WHERE b.service_id IS NOT NULL
+       ORDER BY b.booking_date DESC
     `);
+
     res.json(rows);
   } catch (err) {
     console.error('List All Service Orders Error:', err);

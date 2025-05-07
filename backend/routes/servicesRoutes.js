@@ -17,7 +17,7 @@ const router = express.Router();
 router.get('/services', listServices);
 
 // Admin Routes
-router.post('/services', authenticateToken, verifyAdmin, createService);
+router.post('/services/add', authenticateToken, verifyAdmin, createService);
 router.patch('/services/:id', authenticateToken, verifyAdmin, updateService);
 router.delete('/services/:id', authenticateToken, verifyAdmin, deleteService);
 router.get('/service-orders/all', authenticateToken, verifyAdmin, listAllServiceOrders);

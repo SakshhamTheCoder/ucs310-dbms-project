@@ -9,15 +9,19 @@ const Footer = () => {
         </Typography>
         <Typography variant="body2" align="center" sx={{ mt: 1 }}>
           <Link href="#" color="inherit" sx={{ mx: 1 }}>
-            Privacy Policy
+            Ujjwal Dalal
           </Link>
           |
           <Link href="#" color="inherit" sx={{ mx: 1 }}>
-            Terms of Service
+            Sakshham Bhagat
           </Link>
           |
           <Link href="#" color="inherit" sx={{ mx: 1 }}>
-            Contact Us
+            Dhruv Goyal
+          </Link>
+          |
+          <Link href="#" color="inherit" sx={{ mx: 1 }}>
+            Jeevant Verma
           </Link>
         </Typography>
       </Container>

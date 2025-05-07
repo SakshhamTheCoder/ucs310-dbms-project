@@ -165,6 +165,17 @@ const Navbar = () => {
                 Admin
               </Button>
             )}
+
+            {/* Add Notifications button to the Navbar */}
+            {user && (
+              <Button
+                component={RouterLink}
+                to="/notifications"
+                sx={{ my: 2, color: 'white', display: 'block' }}
+              >
+                Notifications
+              </Button>
+            )}
           </Box>
 
           {/* User Menu */}
@@ -221,4 +232,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar; 
+export default Navbar;

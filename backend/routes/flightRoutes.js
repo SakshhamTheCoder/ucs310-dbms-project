@@ -12,6 +12,7 @@ import {
   getBookingsByUsername,
   addRoute,
   deleteRoute,
+  listRoutes,
 } from '../controllers/flightController.js';
 import {
   authenticateToken,
@@ -24,12 +25,13 @@ const router = express.Router();
 router.get('/flights', listFlights);
 router.get('/airports', listAirports);
 router.get('/airlines', listAirlines);
+router.get('/routes', listRoutes);
 
 // — Admin Only —
 router.post('/flights/add', authenticateToken, verifyAdmin, addFlight);
 router.post('/airports/add', authenticateToken, verifyAdmin, addAirport);
 router.post('/airlines/add', authenticateToken, verifyAdmin, addAirline);
-router.post('/routes/add', addRoute);
+router.post('/routes/add', authenticateToken, verifyAdmin, addRoute);
 router.delete('/routes/delete/:routeId', deleteRoute);
 
 

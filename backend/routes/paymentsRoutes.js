@@ -12,34 +12,34 @@ import {
 
 const router = express.Router();
 
-// User: make a payment
+
 router.post(
   '/payments/initiate',
-  authenticateToken, // Ensure user is authenticated
-  initiatePayment // Handle payment initiation
+  authenticateToken,
+  initiatePayment
 );
 
-// User: view own payments
+
 router.get(
   '/payments/my',
-  authenticateToken, // Ensure user is authenticated
-  listMyPayments // Get list of user's payments
+  authenticateToken,
+  listMyPayments
 );
 
-// Admin: view all payments
+
 router.get(
   '/payments/all',
-  authenticateToken, // Ensure user is authenticated
-  verifyAdmin, // Ensure user is an admin
-  listAllPayments // Get list of all payments
+  authenticateToken,
+  verifyAdmin,
+  listAllPayments
 );
 
-// Admin: update payment status
+
 router.patch(
   '/payments/:id/status',
-  authenticateToken, // Ensure user is authenticated
-  verifyAdmin, // Ensure user is an admin
-  updatePaymentStatus // Update the payment status
+  authenticateToken,
+  verifyAdmin,
+  updatePaymentStatus
 );
 
 export default router;

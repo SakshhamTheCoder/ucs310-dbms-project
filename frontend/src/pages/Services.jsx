@@ -47,46 +47,46 @@ const Services = () => {
   const dispatch = useDispatch();
   const { services, loading } = useSelector(state => state.services);
   const { bookings } = useSelector(state => state.flights);
-  
+
   useEffect(() => {
     dispatch(fetchServices());
     dispatch(fetchUserBookings());
   }, [dispatch]);
-  
+
   const handleAddToBooking = (serviceId) => {
     if (bookings.length === 0) {
       navigate('/flights');
       return;
     }
-    
+
     if (bookings.length === 1) {
       navigate(`/bookings/${bookings[0].booking_id}?tab=services`);
     } else {
       navigate('/bookings');
     }
   };
-  
+
   if (loading && !services.length) {
     return <LoadingSpinner message="Loading available services..." />;
   }
-  
+
   return (
     <Container sx={{ py: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom>
         Available Services
       </Typography>
-      
+
       <Typography variant="subtitle1" color="textSecondary" paragraph>
         Enhance your flight experience with our premium add-on services
       </Typography>
-      
+
       {bookings.length === 0 && (
         <Paper sx={{ p: 3, mb: 4, bgcolor: '#fff9c4' }}>
           <Typography variant="subtitle1">
             Note: You need an active booking to add these services
           </Typography>
-          <Button 
-            variant="outlined" 
+          <Button
+            variant="outlined"
             color="primary"
             onClick={() => navigate('/flights')}
             sx={{ mt: 1 }}
@@ -95,15 +95,15 @@ const Services = () => {
           </Button>
         </Paper>
       )}
-      
+
       {services.length > 0 ? (
         <Grid container spacing={3}>
           {services.map(service => (
             <Grid item xs={12} sm={6} md={4} key={service.service_id}>
-              <Card 
-                sx={{ 
-                  height: '100%', 
-                  display: 'flex', 
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
                   flexDirection: 'column',
                   transition: 'transform 0.3s',
                   '&:hover': {
@@ -114,43 +114,43 @@ const Services = () => {
               >
                 <CardContent sx={{ flexGrow: 1, position: 'relative' }}>
                   {service.available_quantity <= 5 && (
-                    <Chip 
-                      label="Limited Availability" 
-                      color="warning" 
+                    <Chip
+                      label="Limited Availability"
+                      color="warning"
                       size="small"
                       sx={{ position: 'absolute', top: 8, right: 8 }}
                     />
                   )}
-                  
+
                   <Box sx={{ textAlign: 'center', color: 'primary.main', mb: 2 }}>
                     {getServiceIcon(service.name)}
                   </Box>
-                  
+
                   <Typography variant="h5" component="h2" gutterBottom>
                     {service.name}
                   </Typography>
-                  
+
                   <Typography color="textSecondary" paragraph>
                     {service.description || 'Enhance your flight experience with this premium service.'}
                   </Typography>
-                  
+
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
                     <Typography variant="h6" color="primary">
-                      ${service.price}
+                      Rs. {service.price}
                     </Typography>
-                    <Chip 
+                    <Chip
                       label={`${service.available_quantity} available`}
                       size="small"
                       color={service.available_quantity > 10 ? 'success' : 'warning'}
                     />
                   </Box>
                 </CardContent>
-                
+
                 <Divider />
-                
+
                 <CardActions>
-                  <Button 
-                    size="small" 
+                  <Button
+                    size="small"
                     fullWidth
                     startIcon={<ShoppingCartIcon />}
                     variant="contained"
@@ -172,7 +172,7 @@ const Services = () => {
           </Typography>
         </Paper>
       )}
-      
+
       <Paper sx={{ p: 3, mt: 5 }}>
         <Typography variant="h5" gutterBottom>
           Why Choose Our Services?

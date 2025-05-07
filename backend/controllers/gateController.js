@@ -18,7 +18,7 @@ import sqlQuery from '../utils/db.js';
 
 export const listGates = async (_req, res) => {
   try {
-    const rows = await sqlQuery('SELECT * FROM gates ORDER BY terminal, gate_number');
+    const rows = await sqlQuery('SELECT * FROM gates ORDER BY gate_number');
     res.json(rows);
   } catch (err) {
     console.error('List Gates Error:', err);
@@ -53,8 +53,8 @@ export const updateGate = async (req, res) => {
     return res.status(400).json({ message: 'status is required' });
   }
   if (!allowedStatus.includes(status)) {
-    return res.status(400).json({ 
-      message: `Invalid status value. Must be one of: ${allowedStatus.join(', ')}` 
+    return res.status(400).json({
+      message: `Invalid status value. Must be one of: ${allowedStatus.join(', ')}`
     });
   }
 
@@ -115,7 +115,7 @@ export const viewFlightGate = async (req, res) => {
   const flightId = Number(req.params.fid);
   try {
     const rows = await sqlQuery(
-      `SELECT ga.id, g.gate_id, g.terminal, g.gate_number, g.status
+      `SELECT ga.id, g.gate_id, g.gate_number, g.status
          FROM gate_assignments ga
          JOIN gates g ON ga.gate_id = g.gate_id
         WHERE ga.flight_id = ?`,
